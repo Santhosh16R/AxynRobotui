@@ -1540,16 +1540,14 @@ Always acknowledge the user warmly and confirm when navigation begins.`;
 
 // PROXY SDP OFFER TO OPENAI (Eliminates browser CORS and corporate TLS inspection blocks)
 app.post('/api/realtime/sdp', async (req, res) => {
-  const { sdp, clientSecret, model } = req.body;
+  const { sdp, clientSecret } = req.body;
   if (!sdp || !clientSecret) {
     return res.status(400).json({ error: 'SDP offer and clientSecret are required' });
   }
 
-  const targetModel = model || 'gpt-4o-realtime-preview-2024-12-17';
-
   try {
-    // 1. Try GA WebRTC endpoint with ?model= parameter
-    let sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${targetModel}`, {
+    // Official GA WebRTC SDP endpoint
+    const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
       method: 'POST',
       body: sdp,
       headers: {
@@ -1557,18 +1555,6 @@ app.post('/api/realtime/sdp', async (req, res) => {
         'Content-Type': 'application/sdp'
       }
     });
-
-    if (!sdpResponse.ok) {
-      // 2. Fallback to /v1/realtime without query param
-      sdpResponse = await fetch('https://api.openai.com/v1/realtime', {
-        method: 'POST',
-        body: sdp,
-        headers: {
-          'Authorization': `Bearer ${clientSecret}`,
-          'Content-Type': 'application/sdp'
-        }
-      });
-    }
 
     if (!sdpResponse.ok) {
       const errText = await sdpResponse.text();
