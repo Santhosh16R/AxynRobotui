@@ -62,6 +62,19 @@ class AxynApp {
       poiName: document.getElementById('poiName'),
       poiCategory: document.getElementById('poiCategory'),
       poiColor: document.getElementById('poiColor'),
+      poiX: document.getElementById('poiX'),
+      poiY: document.getElementById('poiY'),
+      poiDescription: document.getElementById('poiDescription'),
+
+      // Floating System Logs Console
+      floatingLogsWidget: document.getElementById('floatingLogsWidget'),
+      logsWidgetHeader: document.getElementById('logsWidgetHeader'),
+      btnToggleMinimizeLogs: document.getElementById('btnToggleMinimizeLogs'),
+      btnFloatingClearLogs: document.getElementById('btnFloatingClearLogs'),
+      floatingLogsStream: document.getElementById('floatingLogsStream'),
+      floatingLogCount: document.getElementById('floatingLogCount'),
+      minBtnText: document.getElementById('minBtnText'),
+      minimizeIcon: document.getElementById('minimizeIcon'),
 
       // Avatar Switcher Elements
       btnViewFace: document.getElementById('btnViewFace'),
@@ -927,7 +940,7 @@ class AxynApp {
         tr.querySelector('.btn-del').addEventListener('click', () => {
           this.activeMap.pois.splice(index, 1);
           this.showToast(`Deleted ${poi.name}`, 'info');
-          this.renderPois();
+          this.renderPoisList();
           this.updateSettingsEditorTables();
         });
 
@@ -975,7 +988,7 @@ class AxynApp {
       if (data.success) {
         this.activeMap = data.activeMap;
         if (this.map) this.map.resetView();
-        this.renderPois();
+        this.renderPoisList();
         this.showToast(`💾 Custom Map "${this.activeMap.name}" saved successfully!`, 'success');
       } else {
         this.showToast(`Error saving map: ${data.error}`, 'error');

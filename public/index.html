@@ -46,7 +46,7 @@
       <!-- CENTER: THE DYNAMIC ISLAND -->
       <div class="header-center">
         <div class="dynamic-island" id="dynamicIsland" title="Axyn System Island">
-          <div class="island-status-group">
+          <div class="island-status-group" id="statusCapsule">
             <span class="status-pulse-dot" id="statusDot"></span>
             <span class="status-text" id="statusText">CONNECTING...</span>
           </div>
@@ -68,6 +68,7 @@
         </div>
       </div>
 
+      <div class="header-right">
         <!-- Settings & Map Customizer Button -->
         <button id="btnOpenSettings" class="ios-pill-btn btn-settings" title="Settings & Map Editor">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
@@ -146,9 +147,9 @@
             <div class="face-screen-inner">
               <!-- Status sensor strip -->
               <div class="face-sensor-strip">
-                <span class="sensor-led led-left"></span>
-                <span class="sensor-mesh">AXYN CONCIERGE OLED</span>
-                <span class="sensor-led led-right"></span>
+                <span class="sensor-dot live"></span>
+                <span class="sensor-label">AXYN AI NEURAL CORE</span>
+                <span class="sensor-dot"></span>
               </div>
 
               <!-- Robotic Eyes & Cheeks Container -->
@@ -236,7 +237,7 @@
             </div>
           </div>
 
-          <!-- Siri / Voice Status Information -->
+          <!-- Voice Status Information -->
           <div class="voice-status-info">
             <h3 class="voice-state-title" id="voiceStateTitle">Ready to Listen</h3>
             <p class="voice-state-subtitle" id="voiceStateSubtitle">Tap the microphone and ask for a destination</p>
@@ -429,6 +430,7 @@
             <!-- CANVAS VIEWPORT -->
             <div class="canvas-wrapper" id="canvasWrapper">
               <canvas id="mapCanvas"></canvas>
+
               <!-- FLOATING INTERACTIVE MAP EDITOR TOOLBAR (Appears when editing map) -->
               <div class="map-editor-floating-toolbar" id="mapEditorToolbar" style="display: none;">
                 <div class="editor-hud-badge">
@@ -591,26 +593,26 @@
               <p class="teleop-desc">Control linear velocity and angular steering. Keyboard: W/A/S/D or Arrow Keys.</p>
               
               <div class="joystick-zone" id="joystickZone">
-                <div class="joystick-base">
+                <div class="joystick-base" id="joystickBase">
                   <div class="joystick-stick" id="joystickStick"></div>
                 </div>
               </div>
 
               <!-- D-Pad Fallback Controls -->
               <div class="dpad-container">
-                <button class="dpad-btn dpad-up" data-dir="forward" title="Forward (W)">▲</button>
+                <button id="btnDpadUp" class="dpad-btn dpad-up" data-dir="forward" title="Forward (W)">▲</button>
                 <div class="dpad-row">
-                  <button class="dpad-btn dpad-left" data-dir="left" title="Turn Left (A)">◀</button>
-                  <button class="dpad-btn dpad-stop" data-dir="stop" title="Stop (Space)">■</button>
-                  <button class="dpad-btn dpad-right" data-dir="right" title="Turn Right (D)">▶</button>
+                  <button id="btnDpadLeft" class="dpad-btn dpad-left" data-dir="left" title="Turn Left (A)">◀</button>
+                  <button id="btnDpadStop" class="dpad-btn dpad-stop" data-dir="stop" title="Stop (Space)">■</button>
+                  <button id="btnDpadRight" class="dpad-btn dpad-right" data-dir="right" title="Turn Right (D)">▶</button>
                 </div>
-                <button class="dpad-btn dpad-down" data-dir="backward" title="Reverse (S)">▼</button>
+                <button id="btnDpadDown" class="dpad-btn dpad-down" data-dir="backward" title="Reverse (S)">▼</button>
               </div>
 
               <!-- Speed Presets -->
               <div class="speed-slider-group">
-                <label>Max Linear Speed: <span id="linearSpeedVal">1.0 m/s</span></label>
-                <input type="range" id="sliderLinearSpeed" min="0.2" max="2.0" step="0.1" value="1.0" />
+                <label>Max Linear Speed: <span id="speedValue">1.0 m/s</span></label>
+                <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0" />
               </div>
             </div>
           </div>
@@ -937,47 +939,6 @@
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="btnCancelWallModal">Cancel</button>
             <button type="submit" class="btn-primary">Add Wall Barrier</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- MODAL: OPENAI REALTIME VOICE SETTINGS -->
-    <div class="modal-overlay" id="openaiSettingsModal" style="display: none;">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3>✨ OpenAI Realtime Voice Configuration</h3>
-          <button class="modal-close-btn" id="btnCloseOpenAiModal">&times;</button>
-        </div>
-        <form id="openaiSettingsForm" class="modal-body">
-          <div class="form-group">
-            <label for="openaiApiKey">OpenAI API Key</label>
-            <input type="password" id="openaiApiKey" placeholder="sk-proj-..." autocomplete="off" />
-            <span class="field-hint">Used for ultra-low latency WebRTC speech-to-speech with GPT-4o. Stored only in your local browser session.</span>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="openaiVoiceSelect">Voice Tone</label>
-              <select id="openaiVoiceSelect">
-                <option value="alloy">Alloy (Balanced & Clear)</option>
-                <option value="echo">Echo (Warm & Natural)</option>
-                <option value="shimmer">Shimmer (Bright & Confident)</option>
-                <option value="verse">Verse (Dynamic & Expressive)</option>
-                <option value="ballad">Ballad (Calm & Gentle)</option>
-                <option value="coral">Coral (Friendly & Modern)</option>
-                <option value="sage">Sage (Authoritative & Deep)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="openaiModelSelect">Realtime Model</label>
-              <select id="openaiModelSelect" disabled>
-                <option value="gpt-4o-realtime-preview-2024-12-17">gpt-4o-realtime-preview</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" id="btnCancelOpenAiSettings">Cancel</button>
-            <button type="submit" class="btn-primary">Save Settings</button>
           </div>
         </form>
       </div>

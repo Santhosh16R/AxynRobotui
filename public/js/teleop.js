@@ -31,6 +31,8 @@ class TeleoperationController {
   }
 
   initJoystick() {
+    if (!this.base || !this.stick) return;
+
     const onStart = (e) => {
       e.preventDefault();
       this.active = true;
@@ -47,7 +49,7 @@ class TeleoperationController {
     const onEnd = () => {
       if (!this.active) return;
       this.active = false;
-      this.stick.style.transform = 'translate(0px, 0px)';
+      if (this.stick) this.stick.style.transform = 'translate(0px, 0px)';
       this.linearVel = 0;
       this.angularVel = 0;
       this.sendVelocity(0, 0);
@@ -66,12 +68,14 @@ class TeleoperationController {
     window.addEventListener('mouseup', onEnd);
 
     // Speed Slider
-    this.speedSlider.addEventListener('input', (e) => {
-      const pct = parseInt(e.target.value, 10);
-      this.linearSpeedScale = pct / 100;
-      const maxSpd = (1.2 * this.linearSpeedScale).toFixed(1);
-      this.speedValue.textContent = `${pct}% (${maxSpd} m/s)`;
-    });
+    if (this.speedSlider) {
+      this.speedSlider.addEventListener('input', (e) => {
+        const pct = parseInt(e.target.value, 10);
+        this.linearSpeedScale = pct / 100;
+        const maxSpd = (1.2 * this.linearSpeedScale).toFixed(1);
+        if (this.speedValue) this.speedValue.textContent = `${pct}% (${maxSpd} m/s)`;
+      });
+    }
   }
 
   handlePointerMove(e) {
@@ -132,6 +136,7 @@ class TeleoperationController {
 
   initDpad() {
     const bindBtn = (btn, lin, ang) => {
+      if (!btn) return;
       const start = (e) => {
         e.preventDefault();
         this.linearVel = lin * 1.2 * this.linearSpeedScale;
@@ -153,14 +158,16 @@ class TeleoperationController {
       btn.addEventListener('touchend', stop);
     };
 
-    bindBtn(this.domDpad.up, 1.0, 0);
-    bindBtn(this.domDpad.down, -1.0, 0);
-    bindBtn(this.domDpad.left, 0, 1.0);
-    bindBtn(this.domDpad.right, 0, -1.0);
+    if (this.domDpad.up) bindBtn(this.domDpad.up, 1.0, 0);
+    if (this.domDpad.down) bindBtn(this.domDpad.down, -1.0, 0);
+    if (this.domDpad.left) bindBtn(this.domDpad.left, 0, 1.0);
+    if (this.domDpad.right) bindBtn(this.domDpad.right, 0, -1.0);
 
-    this.domDpad.stop.addEventListener('click', () => {
-      this.sendVelocity(0, 0);
-    });
+    if (this.domDpad.stop) {
+      this.domDpad.stop.addEventListener('click', () => {
+        this.sendVelocity(0, 0);
+      });
+    }
   }
 
   initKeyboard() {
