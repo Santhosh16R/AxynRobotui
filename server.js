@@ -930,6 +930,47 @@ function processVoiceIntent(transcript) {
     }
   }
 
+  // 12.5 Knowledge Base Q&A (e.g. iNXT, LTM, Wi-Fi, Hours, Restrooms, Maintenance)
+  if (query.includes('inxt') || query.includes('i nxt') || query.includes('l next') || query.includes('i next') || query.includes('industry nxt') || query.includes('industry.nxt') || query.includes('ltm') || query.includes('ltimindtree')) {
+    return {
+      speech: "LTM iNXT (Industry.NXT) is an enterprise digital transformation platform that connects industrial equipment, IoT sensors, AI analytics, and digital twins to optimize factory operations and enable predictive maintenance.",
+      action: 'converse',
+      success: true
+    };
+  }
+
+  if (query.includes('predictive maintenance') || query.includes('anomaly') || query.includes('sensor')) {
+    return {
+      speech: "iNXT uses industrial IoT sensors and AI analytics for predictive maintenance, detecting equipment wear and anomalies early to reduce unplanned downtime by up to 40 percent.",
+      action: 'converse',
+      success: true
+    };
+  }
+
+  if (query.includes('wifi') || query.includes('wi-fi') || query.includes('internet') || query.includes('network') || query.includes('password')) {
+    return {
+      speech: "You can connect to our guest Wi-Fi network 'Axyn-Guest' using the password 'Welcome2026!'.",
+      action: 'converse',
+      success: true
+    };
+  }
+
+  if (query.includes('hour') || query.includes('open') || query.includes('schedule') || query.includes('timing')) {
+    return {
+      speech: "Our building operating hours are Monday to Friday from 8:00 AM to 7:00 PM. Weekend access is card-only.",
+      action: 'converse',
+      success: true
+    };
+  }
+
+  if (query.includes('restroom') || query.includes('toilet') || query.includes('washroom') || query.includes('bathroom')) {
+    return {
+      speech: "Restrooms are located in the North Corridor next to the Elevator Lobby, and beside the Skyview Cafeteria.",
+      action: 'converse',
+      success: true
+    };
+  }
+
   // 13. Conversational Fallback
   return {
     speech: `I heard you say "${transcript}". I can answer questions about the facility, chat with you, or escort you to places like the Executive Boardroom, Reception, or Cafeteria. Where would you like to go?`,
