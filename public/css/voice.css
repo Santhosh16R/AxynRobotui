@@ -1,0 +1,1059 @@
+/* ==========================================================================
+   VOICE CONCIERGE ASSISTANT & ORB VISUALIZER STYLES
+   ========================================================================== */
+
+.voice-assistant-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+/* Voice Engine Switcher */
+.voice-engine-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 4px 6px;
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 2px;
+}
+
+.engine-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.engine-pill:hover {
+  color: var(--text-main);
+}
+
+.engine-pill.active {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(16, 185, 129, 0.18));
+  color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.35);
+}
+
+.engine-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.engine-settings-btn:hover {
+  color: var(--accent-cyan);
+  border-color: rgba(0, 229, 255, 0.4);
+  transform: rotate(45deg);
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+/* ==========================================================================
+   AVATAR VIEW TOGGLE (ROBOT FACE vs ORB)
+   ========================================================================== */
+.avatar-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+
+.avatar-toggle-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.avatar-toggle-btn.active {
+  background: var(--bg-tertiary);
+  color: var(--accent-cyan);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   ROBOTIC FACE DISPLAY (EYES & MOUTH) - OLED DISPLAY & ULTRA CUTE
+   ========================================================================== */
+.robot-face-display {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  height: 250px;
+  background: radial-gradient(circle at center, #0c1424 0%, #03060f 100%);
+  border: 2px solid rgba(0, 229, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 0 32px rgba(0, 229, 255, 0.16), inset 0 0 24px rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  overflow: hidden;
+  user-select: none;
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.robot-face-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+.face-screen-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Top Sensor / Status Strip */
+.face-sensor-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 4px;
+}
+
+.sensor-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+  animation: pulse-dot 2s infinite;
+}
+
+.sensor-mesh {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(0, 229, 255, 0.55);
+}
+
+.robot-eyes-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  margin-top: 6px;
+  width: 100%;
+  transition: transform 0.15s ease-out, gap 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.robot-eye {
+  position: relative;
+  width: 94px;
+  height: 86px;
+  border-radius: 48% 48% 44% 44%;
+  background: radial-gradient(circle at 35% 35%, #00e5ff 0%, #0284c7 65%, #030712 100%);
+  box-shadow: 0 0 32px rgba(0, 229, 255, 0.85), inset 0 0 16px rgba(255, 255, 255, 0.75);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.eye-pupil {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #ffffff 0%, #38bdf8 70%, #0284c7 100%);
+  box-shadow: 0 0 20px #ffffff, 0 0 30px rgba(0, 229, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Rotating Iris Dial with Cardinal Notches for Obvious Rotation */
+.pupil-iris-dial {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.65);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.iris-notch {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+}
+
+.iris-notch.n-top { top: 1px; left: calc(50% - 2px); }
+.iris-notch.n-right { top: calc(50% - 2px); right: 1px; }
+.iris-notch.n-bottom { bottom: 1px; left: calc(50% - 2px); }
+.iris-notch.n-left { top: calc(50% - 2px); left: 1px; }
+
+.pupil-core {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0b1324;
+  box-shadow: inset 0 0 6px #000000;
+  transition: width 0.35s ease, height 0.35s ease;
+}
+
+.pupil-sparkle {
+  position: absolute;
+  pointer-events: none;
+}
+
+.main-sparkle {
+  top: 5px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+}
+
+.sub-sparkle {
+  bottom: 6px;
+  left: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+}
+
+.star-sparkle {
+  top: 10px;
+  left: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffffff;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px #ffffff);
+  line-height: 1;
+}
+
+/* Cute Rosy Blush Cheeks */
+.face-blush {
+  position: absolute;
+  bottom: -6px;
+  width: 32px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 107, 129, 0.85) 0%, rgba(255, 107, 129, 0) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  opacity: 0.55;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.blush-left { left: 46px; }
+.blush-right { right: 46px; }
+
+.blush-line {
+  width: 2px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  transform: rotate(-15deg);
+  border-radius: 1px;
+}
+
+/* Interactive Cute Hover Reaction */
+.robot-face-display {
+  cursor: pointer;
+}
+
+.robot-face-display:hover .face-blush,
+.robot-face-display.expr-happy .face-blush,
+.robot-face-display.expr-lovestruck .face-blush {
+  opacity: 1;
+  transform: scale(1.35);
+}
+
+.robot-face-display:hover .robot-eye {
+  transform: scale(1.05);
+}
+
+.robot-face-display:active {
+  transform: scale(0.97);
+}
+
+/* Smooth Eyelids & Natural Blinking */
+.eyelid {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: #060a14;
+  z-index: 10;
+  transition: height 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.eyelid-top {
+  top: 0;
+  height: 0%;
+  border-bottom: 2.5px solid rgba(0, 229, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25);
+}
+
+.eyelid-bottom {
+  bottom: 0;
+  height: 0%;
+  border-top: 2px solid rgba(0, 229, 255, 0.4);
+}
+
+/* Smooth Blinking Animation Trigger */
+.robot-face-display.blinking .eyelid-top {
+  height: 53%;
+}
+
+.robot-face-display.blinking .eyelid-bottom {
+  height: 50%;
+}
+
+.robot-face-display.blinking .robot-eye {
+  transform: scaleY(0.92);
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Robotic Mouth */
+.robot-mouth-wrapper {
+  position: relative;
+  width: 130px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.mouth-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mouth-line {
+  fill: none;
+  stroke: var(--accent-cyan);
+  stroke-width: 5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 10px var(--accent-cyan));
+  transition: d 0.15s ease-out, stroke 0.3s ease;
+}
+
+.mouth-eq-bars {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.m-eq-bar {
+  width: 3px;
+  height: 4px;
+  background: var(--accent-cyan);
+  border-radius: 2px;
+  animation: wave-bounce 0.8s ease-in-out infinite alternate;
+}
+
+.m-eq-bar:nth-child(1) { animation-delay: 0.1s; height: 6px; }
+.m-eq-bar:nth-child(2) { animation-delay: 0.3s; height: 10px; }
+.m-eq-bar:nth-child(3) { animation-delay: 0.2s; height: 12px; }
+.m-eq-bar:nth-child(4) { animation-delay: 0.4s; height: 8px; }
+.m-eq-bar:nth-child(5) { animation-delay: 0.15s; height: 5px; }
+
+/* ==========================================
+   FACIAL EMOTION THEMES & EXPRESSIONS
+   ========================================= */
+
+/* 1. LISTENING MODE */
+.robot-face-display.expr-listening {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+}
+
+.robot-face-display.expr-listening .robot-eye {
+  background: radial-gradient(circle at 40% 40%, #10b981 0%, #059669 60%, #030712 100%);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.8);
+  transform: scale(1.06);
+}
+
+.robot-face-display.expr-listening .mouth-line {
+  stroke: var(--accent-emerald);
+  filter: drop-shadow(0 0 8px var(--accent-emerald));
+}
+
+.robot-face-display.expr-listening .mouth-eq-bars {
+  opacity: 1;
+}
+
+.robot-face-display.expr-listening .m-eq-bar {
+  background: var(--accent-emerald);
+}
+
+/* 2. SPEAKING MODE */
+.robot-face-display.expr-speaking {
+  border-color: rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 32px rgba(0, 229, 255, 0.3);
+}
+
+.robot-face-display.expr-speaking .robot-eye {
+  animation: eye-talk 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes eye-talk {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+.robot-face-display.expr-speaking .mouth-eq-bars {
+  opacity: 1;
+}
+
+/* 3. HAPPY / GIGGLE MODE */
+.robot-face-display.expr-happy .eyelid-bottom {
+  height: 40%;
+  border-top: 2.5px solid rgba(0, 229, 255, 0.85);
+  background: #090e1a;
+}
+
+.robot-face-display.expr-happy .robot-eye {
+  transform: scale(1.05);
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.9);
+}
+
+.robot-face-display.expr-happy .face-blush {
+  opacity: 1;
+  transform: scale(1.4);
+}
+
+/* 4. CURIOUS MODE */
+.robot-face-display.expr-curious .robot-eye {
+  transform: scale(1.03);
+}
+
+.robot-face-display.expr-curious .mouth-line {
+  stroke: #38bdf8;
+  filter: drop-shadow(0 0 8px #38bdf8);
+}
+
+/* 5. SURPRISED MODE */
+.robot-face-display.expr-surprised .eye-pupil {
+  transform: scale(1.2);
+}
+
+.robot-face-display.expr-surprised .robot-eye {
+  transform: scale(1.08);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.95);
+}
+
+/* 6. EMERGENCY STOP / ALERT MODE */
+.robot-face-display.expr-alert {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 34px rgba(239, 68, 68, 0.4);
+}
+
+.robot-face-display.expr-alert .robot-eye {
+  background: radial-gradient(circle at 40% 40%, #ef4444 0%, #b91c1c 60%, #450a0a 100%);
+  box-shadow: 0 0 26px rgba(239, 68, 68, 0.85);
+}
+
+.robot-face-display.expr-alert .sensor-led {
+  background: var(--accent-danger);
+  box-shadow: 0 0 8px var(--accent-danger);
+}
+
+.robot-face-display.expr-alert .mouth-line {
+  stroke: var(--accent-danger);
+  filter: drop-shadow(0 0 10px var(--accent-danger));
+}
+
+/* 5. SLEEPING / DOCKED MODE */
+.robot-face-display.expr-sleeping .eyelid-top {
+  height: 60%;
+}
+.robot-face-display.expr-sleeping .eyelid-bottom {
+  height: 30%;
+}
+.robot-face-display.expr-sleeping .robot-eye {
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+/* Glowing Interactive Voice Orb */
+.voice-orb-wrapper {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.voice-orb-outer-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(0, 229, 255, 0.35);
+  animation: orb-spin 20s linear infinite;
+}
+
+@keyframes orb-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.voice-orb {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #00e5ff 0%, #0077b6 60%, #030712 100%);
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.4), inset 0 0 16px rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.orb-core {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  filter: blur(4px);
+  animation: core-pulse 3s ease-in-out infinite;
+}
+
+@keyframes core-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Listening Mode Animation */
+.voice-assistant-card.listening .voice-orb {
+  transform: scale(1.12);
+  background: radial-gradient(circle at 35% 35%, #10b981 0%, #059669 60%, #030712 100%);
+  box-shadow: 0 0 38px rgba(16, 185, 129, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+.voice-assistant-card.listening .voice-orb-outer-ring {
+  border-color: rgba(16, 185, 129, 0.7);
+  animation: orb-spin 6s linear infinite;
+}
+
+/* Speaking Mode Animation */
+.voice-assistant-card.speaking .voice-orb {
+  transform: scale(1.08);
+  background: radial-gradient(circle at 35% 35%, #38ef7d 0%, #11998e 60%, #030712 100%);
+  box-shadow: 0 0 34px rgba(56, 239, 125, 0.6);
+  animation: orb-talk 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes orb-talk {
+  0% { transform: scale(1.02); }
+  100% { transform: scale(1.15); }
+}
+
+/* Sound Wave Bars */
+.voice-wave-container {
+  position: absolute;
+  bottom: -4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.voice-assistant-card.listening .voice-wave-container,
+.voice-assistant-card.speaking .voice-wave-container {
+  opacity: 1;
+}
+
+.wave-bar {
+  width: 3px;
+  height: 6px;
+  background: var(--accent-cyan);
+  border-radius: 3px;
+  animation: wave-bounce 1s ease-in-out infinite alternate;
+}
+
+.voice-assistant-card.listening .wave-bar { background: var(--accent-emerald); }
+
+.wave-bar:nth-child(1) { animation-delay: 0.1s; height: 8px; }
+.wave-bar:nth-child(2) { animation-delay: 0.3s; height: 14px; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; height: 18px; }
+.wave-bar:nth-child(4) { animation-delay: 0.4s; height: 12px; }
+.wave-bar:nth-child(5) { animation-delay: 0.15s; height: 7px; }
+
+@keyframes wave-bounce {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.4); }
+}
+
+/* Status Info Text */
+.voice-status-info {
+  text-align: center;
+}
+
+.voice-state-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-highlight);
+}
+
+.voice-state-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Mic Action Center */
+.voice-action-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.mic-toggle-btn {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 2px solid rgba(0, 229, 255, 0.3);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.mic-toggle-btn:hover {
+  border-color: var(--accent-cyan);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+}
+
+.mic-toggle-btn.active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border-color: #34d399;
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.6);
+}
+
+.mic-ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--accent-emerald);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mic-toggle-btn.active .mic-ripple {
+  animation: mic-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes mic-ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.voice-toggles {
+  display: flex;
+  gap: 8px;
+}
+
+.voice-aux-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.voice-aux-btn.active {
+  color: var(--accent-cyan);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+/* Dialog Box */
+.voice-dialog-box {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 80px;
+}
+
+.dialog-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.dialog-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.user-query .dialog-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-emerald);
+}
+
+.robot-reply .dialog-badge {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--accent-cyan);
+}
+
+.dialog-text {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+
+.user-query .dialog-text {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Quick Prompt Chips */
+.quick-prompts-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-prompts-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.prompt-chip {
+  padding: 5px 10px;
+  border-radius: 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.prompt-chip:hover {
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--accent-cyan);
+  border-color: rgba(0, 229, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Text Command Input Bar */
+.text-command-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 4px 6px;
+  transition: border-color var(--transition-fast);
+}
+
+.text-command-bar:focus-within {
+  border-color: var(--accent-cyan);
+}
+
+.text-command-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 12.5px;
+  padding: 6px 8px;
+  outline: none;
+}
+
+/* iOS Glass Cards & Search Bars */
+.ios-glass-card {
+  background: rgba(22, 27, 34, 0.65);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.ios-glass-search {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  padding: 6px 8px 6px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.ios-mic-btn {
+  background: radial-gradient(circle at 40% 40%, #1e293b 0%, #0a0f1d 100%);
+  border: 2px solid rgba(0, 229, 255, 0.4);
+  box-shadow: 0 6px 24px rgba(0, 229, 255, 0.25);
+}
+
+.ios-mic-btn.active {
+  background: radial-gradient(circle at 40% 40%, #30d158 0%, #0e7030 100%);
+  border-color: #34d399;
+  box-shadow: 0 0 36px rgba(48, 209, 88, 0.65);
+}
+
+.mic-ripple.ring-1 {
+  animation-delay: 0s;
+}
+
+.mic-ripple.ring-2 {
+  animation-delay: 0.75s;
+}
+
+.text-send-btn {
+  background: var(--accent-cyan);
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.text-send-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ==========================================================================
+   FULLSCREEN ROBOT FACE KIOSK MODE SCALING
+   (When map is minimized, face expands to cover the screen)
+   ========================================================================== */
+.main-layout.map-minimized .robot-face-display,
+.face-fullscreen-mode .robot-face-display {
+  max-width: 860px;
+  height: 52vh;
+  min-height: 380px;
+  border-radius: 40px;
+  border-width: 3px;
+  box-shadow: 0 0 60px rgba(0, 229, 255, 0.3), inset 0 0 40px rgba(0, 0, 0, 0.95);
+  margin-bottom: 8px;
+}
+
+.main-layout.map-minimized .robot-eyes-wrapper,
+.face-fullscreen-mode .robot-eyes-wrapper {
+  gap: 130px;
+  margin-top: 16px;
+}
+
+.main-layout.map-minimized .robot-eye,
+.face-fullscreen-mode .robot-eye {
+  width: 154px;
+  height: 142px;
+  border-radius: 48% 48% 44% 44%;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 48px rgba(0, 229, 255, 0.9), inset 0 0 24px rgba(255, 255, 255, 0.85);
+}
+
+.main-layout.map-minimized .eye-pupil,
+.face-fullscreen-mode .eye-pupil {
+  width: 70px;
+  height: 70px;
+  box-shadow: 0 0 26px #ffffff;
+}
+
+.main-layout.map-minimized .pupil-core,
+.face-fullscreen-mode .pupil-core {
+  width: 30px;
+  height: 30px;
+}
+
+.main-layout.map-minimized .main-sparkle,
+.face-fullscreen-mode .main-sparkle {
+  width: 18px;
+  height: 18px;
+  top: 7px;
+  right: 8px;
+  box-shadow: 0 0 12px #ffffff;
+}
+
+.main-layout.map-minimized .sub-sparkle,
+.face-fullscreen-mode .sub-sparkle {
+  width: 9px;
+  height: 9px;
+  bottom: 8px;
+  left: 10px;
+}
+
+.main-layout.map-minimized .star-sparkle,
+.face-fullscreen-mode .star-sparkle {
+  font-size: 20px;
+  top: 13px;
+  left: 14px;
+}
+
+.main-layout.map-minimized .face-blush,
+.face-fullscreen-mode .face-blush {
+  width: 58px;
+  height: 32px;
+  bottom: -10px;
+  opacity: 0.8;
+}
+
+.main-layout.map-minimized .blush-left,
+.face-fullscreen-mode .blush-left {
+  left: 80px;
+}
+
+.main-layout.map-minimized .blush-right,
+.face-fullscreen-mode .blush-right {
+  right: 80px;
+}
+
+.main-layout.map-minimized .blush-line,
+.face-fullscreen-mode .blush-line {
+  width: 3.5px;
+  height: 14px;
+}
+
+.main-layout.map-minimized .robot-mouth-wrapper,
+.face-fullscreen-mode .robot-mouth-wrapper {
+  width: 240px;
+  height: 74px;
+  margin-bottom: 12px;
+}
+
+.main-layout.map-minimized .mouth-line,
+.face-fullscreen-mode .mouth-line {
+  stroke-width: 8px;
+  filter: drop-shadow(0 0 16px var(--accent-cyan));
+}
+
+.main-layout.map-minimized .sensor-mesh,
+.face-fullscreen-mode .sensor-mesh {
+  font-size: 12px;
+  letter-spacing: 3.5px;
+}
+
+.main-layout.map-minimized .voice-dialog-box,
+.face-fullscreen-mode .voice-dialog-box,
+.main-layout.map-minimized .quick-prompts-section,
+.face-fullscreen-mode .quick-prompts-section,
+.main-layout.map-minimized .text-command-bar,
+.face-fullscreen-mode .text-command-bar {
+  max-width: 780px;
+}

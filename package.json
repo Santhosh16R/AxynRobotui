@@ -1,0 +1,30 @@
+{
+  "name": "robot-axyn-concierge",
+  "version": "1.0.0",
+  "description": "Robot Axyn Concierge - Local Server with Interactive Mapping, Voice Recognition, and Navigation UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "robotics",
+    "axyn",
+    "concierge",
+    "navigation",
+    "mapping",
+    "voice-recognition",
+    "teleoperation",
+    "websocket"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  }
+}
