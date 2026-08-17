@@ -75,33 +75,53 @@ class MapEngine {
     this.initCanvasSize();
     this.initEventListeners();
     this.initEditorToolbarEvents();
+
+    if (window.ResizeObserver && this.dom.wrapper) {
+      const ro = new ResizeObserver(() => {
+        this.initCanvasSize();
+      });
+      ro.observe(this.dom.wrapper);
+    }
+
     this.startRenderLoop();
   }
 
   initCanvasSize() {
+    if (!this.dom.wrapper || !this.canvas) return;
     const rect = this.dom.wrapper.getBoundingClientRect();
-    this.canvas.width = rect.width * window.devicePixelRatio;
-    this.canvas.height = rect.height * window.devicePixelRatio;
-    this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    this.width = rect.width;
-    this.height = rect.height;
+    const w = Math.max(300, rect.width || this.dom.wrapper.clientWidth || 800);
+    const h = Math.max(300, rect.height || this.dom.wrapper.clientHeight || 600);
+    const dpr = window.devicePixelRatio || 1;
 
-    if (this.app.activeMap) {
+    this.canvas.width = w * dpr;
+    this.canvas.height = h * dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+    this.width = w;
+    this.height = h;
+
+    if (this.app && this.app.activeMap) {
       this.resetView();
     }
   }
 
   resetView() {
-    if (!this.app.activeMap) return;
-    const mapDim = this.app.activeMap.dimensions;
-    const padding = 60;
+    if (!this.app || !this.app.activeMap) return;
+    const mapDim = this.app.activeMap.dimensions || { width: 50, height: 35 };
+    const padding = 40;
 
-    const scaleX = (this.width - padding * 2) / (mapDim.width * this.meterToPx);
-    const scaleY = (this.height - padding * 2) / (mapDim.height * this.meterToPx);
-    this.zoom = Math.min(scaleX, scaleY, 1.4);
+    const mapW = mapDim.width || 50;
+    const mapH = mapDim.height || 35;
 
-    this.panX = (this.width - mapDim.width * this.meterToPx * this.zoom) / 2;
-    this.panY = (this.height - mapDim.height * this.meterToPx * this.zoom) / 2;
+    const availableW = Math.max(100, this.width - padding * 2);
+    const availableH = Math.max(100, this.height - padding * 2);
+
+    const scaleX = availableW / (mapW * this.meterToPx);
+    const scaleY = availableH / (mapH * this.meterToPx);
+    this.zoom = Math.max(0.2, Math.min(scaleX, scaleY, 1.5));
+
+    this.panX = (this.width - mapW * this.meterToPx * this.zoom) / 2;
+    this.panY = (this.height - mapH * this.meterToPx * this.zoom) / 2;
 
     this.updateZoomDisplay();
   }
@@ -168,8 +188,8 @@ class MapEngine {
     }
 
     const mapData = this.app.activeMap;
-    const mapW = mapData.dimensions.width;
-    const mapH = mapData.dimensions.height;
+    const mapW = (mapData.dimensions && mapData.dimensions.width) || 50;
+    const mapH = (mapData.dimensions && mapData.dimensions.height) || 35;
 
     // 1. Render Map Floor Background
     const mapTopLeft = this.worldToScreen(0, 0);
