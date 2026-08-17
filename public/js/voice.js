@@ -258,6 +258,79 @@ class VoiceAssistant {
   }
 
   // ==========================================
+  // EVENT LISTENERS
+  // ==========================================
+  initEventHandlers() {
+    if (this.dom.btnToggle) {
+      this.dom.btnToggle.addEventListener('click', () => {
+        this.toggleVoiceActivation();
+      });
+    }
+
+    if (this.dom.btnTts) {
+      this.dom.btnTts.addEventListener('click', () => {
+        this.ttsEnabled = !this.ttsEnabled;
+        this.dom.btnTts.classList.toggle('active', this.ttsEnabled);
+        const label = this.dom.btnTts.querySelector('span');
+        if (label) {
+          label.textContent = `Voice Audio: ${this.ttsEnabled ? 'ON' : 'OFF'}`;
+        }
+        if (!this.ttsEnabled && this.synthesis) {
+          this.synthesis.cancel();
+        }
+        this.app.showToast(`Audio responses: ${this.ttsEnabled ? 'Enabled' : 'Muted'}`, 'info');
+      });
+    }
+
+    if (this.dom.chipsContainer) {
+      this.dom.chipsContainer.addEventListener('click', (e) => {
+        const chip = e.target.closest('.prompt-chip');
+        if (chip && chip.dataset.cmd) {
+          const cmd = chip.dataset.cmd;
+          if (this.engine === 'openai' && this.app.openaiRealtime && this.app.openaiRealtime.isConnected) {
+            this.app.openaiRealtime.sendEvent({
+              type: 'conversation.item.create',
+              item: {
+                type: 'message',
+                role: 'user',
+                content: [{ type: 'input_text', text: cmd }]
+              }
+            });
+            this.app.openaiRealtime.sendEvent({ type: 'response.create' });
+            this.displayUserTranscript(cmd);
+          } else {
+            this.handleUserVoiceInput(cmd);
+          }
+        }
+      });
+    }
+
+    if (this.dom.textForm && this.dom.textInput) {
+      this.dom.textForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = this.dom.textInput.value.trim();
+        if (val) {
+          if (this.engine === 'openai' && this.app.openaiRealtime && this.app.openaiRealtime.isConnected) {
+            this.app.openaiRealtime.sendEvent({
+              type: 'conversation.item.create',
+              item: {
+                type: 'message',
+                role: 'user',
+                content: [{ type: 'input_text', text: val }]
+              }
+            });
+            this.app.openaiRealtime.sendEvent({ type: 'response.create' });
+            this.displayUserTranscript(val);
+          } else {
+            this.handleUserVoiceInput(val);
+          }
+          this.dom.textInput.value = '';
+        }
+      });
+    }
+  }
+
+  // ==========================================
   // UI STATE TRANSITIONS
   // ==========================================
   setListeningState(listening) {
