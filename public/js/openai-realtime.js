@@ -146,24 +146,27 @@ class OpenAIRealtimeClient {
       const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
 
-      // 7. Exchange SDP Offer with OpenAI WebRTC Gateway via Backend Proxy
-      const sdpProxyRes = await fetch('/api/realtime/sdp', {
+      // 7. Exchange SDP Offer with OpenAI WebRTC GA Gateway (/v1/realtime/calls)
+      const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sdp: offer.sdp,
-          clientSecret: clientSecret,
-          model: this.model
-        })
+        body: offer.sdp,
+        headers: {
+          Authorization: `Bearer ${clientSecret}`,
+          'Content-Type': 'application/sdp'
+        }
       });
 
-      if (!sdpProxyRes.ok) {
-        const errData = await sdpProxyRes.json();
-        throw new Error(errData.error || 'SDP negotiation failed on server');
+      if (!sdpResponse.ok) {
+        const errText = await sdpResponse.text();
+        throw new Error(errText);
       }
 
-      const sdpData = await sdpProxyRes.json();
-      const answer = { type: 'answer', sdp: sdpData.sdp };
+      const answerSdp = await sdpResponse.text();
+      const answer = {
+        type: 'answer',
+        sdp: answerSdp
+      };
+
       await this.peerConnection.setRemoteDescription(answer);
 
       this.isConnected = true;
