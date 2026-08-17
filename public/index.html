@@ -775,6 +775,7 @@
                 <div class="form-group">
                   <label for="openaiVoiceSelectSettings">Voice Tone</label>
                   <select id="openaiVoiceSelectSettings">
+                    <option value="marin">Marin (Conversational & Natural - Default)</option>
                     <option value="alloy">Alloy (Balanced & Clear)</option>
                     <option value="echo">Echo (Warm & Natural)</option>
                     <option value="shimmer">Shimmer (Bright & Confident)</option>
@@ -782,11 +783,22 @@
                     <option value="ballad">Ballad (Calm & Gentle)</option>
                     <option value="coral">Coral (Friendly & Modern)</option>
                     <option value="sage">Sage (Authoritative & Deep)</option>
+                    <option value="ash">Ash (Soft & Crisp)</option>
+                    <option value="fable">Fable (Articulate & Warm)</option>
+                    <option value="onyx">Onyx (Deep & Professional)</option>
+                    <option value="nova">Nova (Energetic & Direct)</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Speech Model</label>
-                  <input type="text" value="gpt-4o-realtime-preview-2024-12-17" disabled />
+                  <label for="openaiModelSelectSettings">OpenAI Realtime Model</label>
+                  <input list="realtimeModelOptions" id="openaiModelSelectSettings" placeholder="e.g. gpt-realtime-2.1" value="gpt-realtime-2.1" />
+                  <datalist id="realtimeModelOptions">
+                    <option value="gpt-realtime-2.1">GPT Realtime 2.1 (Current GA)</option>
+                    <option value="gpt-4o-realtime-preview-2024-12-17">GPT-4o Realtime (2024-12-17)</option>
+                    <option value="gpt-4o-realtime-preview">GPT-4o Realtime (Latest Preview)</option>
+                    <option value="gpt-4o-mini-realtime-preview">GPT-4o Mini Realtime (Fast & Lightweight)</option>
+                  </datalist>
+                  <span class="field-hint">Select a preset or enter any custom OpenAI Realtime model ID.</span>
                 </div>
               </div>
               <div class="form-group">

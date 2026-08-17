@@ -122,6 +122,7 @@ class AxynApp {
       voiceSettingsForm: document.getElementById('voiceSettingsForm'),
       openaiApiKeySettings: document.getElementById('openaiApiKeySettings'),
       openaiVoiceSelectSettings: document.getElementById('openaiVoiceSelectSettings'),
+      openaiModelSelectSettings: document.getElementById('openaiModelSelectSettings'),
       facilityKnowledgeBase: document.getElementById('facilityKnowledgeBase'),
       inputIngestUrl: document.getElementById('inputIngestUrl'),
       inputIngestTitle: document.getElementById('inputIngestTitle'),
@@ -809,12 +810,14 @@ class AxynApp {
       this.dom.voiceSettingsForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const key = this.dom.openaiApiKeySettings ? this.dom.openaiApiKeySettings.value.trim() : '';
-        const voice = this.dom.openaiVoiceSelectSettings ? this.dom.openaiVoiceSelectSettings.value : 'alloy';
+        const voice = this.dom.openaiVoiceSelectSettings ? this.dom.openaiVoiceSelectSettings.value : 'marin';
+        const model = this.dom.openaiModelSelectSettings ? this.dom.openaiModelSelectSettings.value.trim() : 'gpt-realtime-2.1';
         const kb = this.dom.facilityKnowledgeBase ? this.dom.facilityKnowledgeBase.value.trim() : '';
 
         if (this.openaiRealtime) {
           this.openaiRealtime.setApiKey(key);
           this.openaiRealtime.setVoice(voice);
+          this.openaiRealtime.setModel(model);
         }
         localStorage.setItem('axyn_knowledge_base', kb);
 
@@ -824,7 +827,7 @@ class AxynApp {
         }
 
         closeSettings();
-        this.showToast('✨ Voice AI & Knowledge Base updated', 'success');
+        this.showToast('✨ Voice AI (Model & Tone) & Knowledge Base updated', 'success');
       });
     }
 
@@ -959,7 +962,8 @@ class AxynApp {
 
     if (this.openaiRealtime) {
       if (this.dom.openaiApiKeySettings) this.dom.openaiApiKeySettings.value = this.openaiRealtime.apiKey || '';
-      if (this.dom.openaiVoiceSelectSettings) this.dom.openaiVoiceSelectSettings.value = this.openaiRealtime.voice || 'alloy';
+      if (this.dom.openaiVoiceSelectSettings) this.dom.openaiVoiceSelectSettings.value = this.openaiRealtime.voice || 'marin';
+      if (this.dom.openaiModelSelectSettings) this.dom.openaiModelSelectSettings.value = this.openaiRealtime.model || 'gpt-realtime-2.1';
     }
 
     if (this.dom.facilityKnowledgeBase) {

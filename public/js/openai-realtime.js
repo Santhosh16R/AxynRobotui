@@ -15,8 +15,8 @@ class OpenAIRealtimeClient {
 
     // Config & Preferences
     this.apiKey = localStorage.getItem('axyn_openai_key') || '';
-    this.voice = localStorage.getItem('axyn_openai_voice') || 'alloy';
-    this.model = 'gpt-4o-realtime-preview-2024-12-17';
+    this.voice = localStorage.getItem('axyn_openai_voice') || 'marin';
+    this.model = localStorage.getItem('axyn_openai_model') || 'gpt-realtime-2.1';
 
     this.initAudioElement();
   }
@@ -35,6 +35,11 @@ class OpenAIRealtimeClient {
   setVoice(voiceName) {
     this.voice = voiceName;
     localStorage.setItem('axyn_openai_voice', this.voice);
+  }
+
+  setModel(modelName) {
+    this.model = (modelName && modelName.trim()) || 'gpt-realtime-2.1';
+    localStorage.setItem('axyn_openai_model', this.model);
   }
 
   // ==========================================
