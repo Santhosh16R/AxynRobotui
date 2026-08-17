@@ -1112,6 +1112,24 @@ app.post('/api/voice-command', (req, res) => {
 });
 
 // ==========================================
+function loadKnowledgeFolder() {
+  const knowledgeDir = path.join(__dirname, 'knowledge');
+  if (!fs.existsSync(knowledgeDir)) return '';
+  try {
+    const files = fs.readdirSync(knowledgeDir);
+    let combined = '';
+    for (const f of files) {
+      if (f.endsWith('.md') || f.endsWith('.txt')) {
+        const content = fs.readFileSync(path.join(knowledgeDir, f), 'utf8');
+        combined += `\n--- [Knowledge Doc: ${f}] ---\n${content.trim()}\n`;
+      }
+    }
+    return combined;
+  } catch (e) {
+    return '';
+  }
+}
+
 // OPENAI REALTIME VOICE API (WebRTC Session)
 // ==========================================
 app.post('/api/realtime/session', (req, res) => {
@@ -1126,7 +1144,9 @@ app.post('/api/realtime/session', (req, res) => {
   }
 
   const poisListStr = activeMap.pois.map(p => `- "${p.name}" (Category: ${p.category}): ${p.description || 'Waypoint'}`).join('\n');
-  const facilityKnowledge = (req.body && req.body.knowledgeBase) || activeMap.knowledgeBase || config.knowledgeBase || '';
+  const folderKnowledge = loadKnowledgeFolder();
+  const customKnowledge = (req.body && req.body.knowledgeBase) || activeMap.knowledgeBase || config.knowledgeBase || '';
+  const facilityKnowledge = [customKnowledge, folderKnowledge].filter(Boolean).join('\n\n');
 
   const systemInstructions = `You are Axyn Concierge, a state-of-the-art, charming, warm, and highly capable autonomous robot concierge developed by Axyn Robotics.
 You are currently active at "${activeMap.name}".
