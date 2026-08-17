@@ -1329,7 +1329,7 @@ function loadKnowledgeFolder() {
 
 // OPENAI REALTIME VOICE API (WebRTC Session)
 // ==========================================
-app.post('/api/realtime/session', (req, res) => {
+app.post('/api/realtime/session', async (req, res) => {
   const apiKey = (req.body && req.body.apiKey) || process.env.OPENAI_API_KEY;
   const voice = (req.body && req.body.voice) || 'alloy';
   const model = (req.body && req.body.model) || 'gpt-4o-realtime-preview-2024-12-17';
@@ -1370,7 +1370,8 @@ AVAILABLE FUNCTION CALLS:
 
 Always acknowledge the conversation warmly and confirm when you begin driving to escort a visitor!`;
 
-  const sessionPayload = JSON.stringify({
+  const sessionObj = {
+    type: 'realtime',
     model: model,
     voice: voice,
     instructions: systemInstructions,
@@ -1437,48 +1438,52 @@ Always acknowledge the conversation warmly and confirm when you begin driving to
         }
       }
     ]
-  });
-
-  const requestOptions = {
-    hostname: 'api.openai.com',
-    port: 443,
-    path: '/v1/realtime/sessions',
-    method: 'POST',
-    rejectUnauthorized: false,
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(sessionPayload)
-    }
   };
 
-  const reqClient = https.request(requestOptions, (apiRes) => {
-    let data = '';
-    apiRes.on('data', (chunk) => { data += chunk; });
-    apiRes.on('end', () => {
-      try {
-        const parsed = JSON.parse(data);
-        if (apiRes.statusCode >= 200 && apiRes.statusCode < 300) {
-          addLog('Generated ephemeral session for OpenAI Realtime Voice', 'success');
-          res.json(parsed);
-        } else {
-          const errMsg = parsed.error ? parsed.error.message : (parsed.message || data);
-          addLog(`OpenAI Realtime error: ${errMsg}`, 'error');
-          res.status(apiRes.statusCode).json(parsed);
-        }
-      } catch (err) {
-        res.status(500).json({ error: 'Failed to parse OpenAI Realtime response', raw: data });
-      }
+  try {
+    // 1. Try modern GA endpoint: /v1/realtime/client_secrets
+    let response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ session: sessionObj })
     });
-  });
 
-  reqClient.on('error', (e) => {
-    console.error('OpenAI Realtime Session Request Error:', e);
-    res.status(500).json({ error: e.message });
-  });
+    // 2. Fallback to beta endpoint if needed
+    if (!response.ok && response.status === 404) {
+      response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sessionObj)
+      });
+    }
 
-  reqClient.write(sessionPayload);
-  reqClient.end();
+    const data = await response.json();
+    if (!response.ok) {
+      const errMsg = data.error ? data.error.message : JSON.stringify(data);
+      addLog(`OpenAI Realtime error: ${errMsg}`, 'error');
+      return res.status(response.status).json({ error: errMsg, details: data });
+    }
+
+    // Normalize ephemeral token key for client compatibility
+    const secretValue = data.value || (data.client_secret && data.client_secret.value) || data.client_secret;
+    const normalized = {
+      ...data,
+      value: secretValue,
+      client_secret: { value: secretValue }
+    };
+
+    addLog('Generated ephemeral session for OpenAI Realtime Voice', 'success');
+    res.json(normalized);
+  } catch (err) {
+    addLog(`OpenAI Realtime session error: ${err.message}`, 'error');
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================================

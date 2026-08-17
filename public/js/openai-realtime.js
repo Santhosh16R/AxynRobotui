@@ -75,7 +75,7 @@ class OpenAIRealtimeClient {
       }
 
       const sessionData = await sessionRes.json();
-      const clientSecret = sessionData.client_secret ? sessionData.client_secret.value : null;
+      const clientSecret = sessionData.value || (sessionData.client_secret ? sessionData.client_secret.value : sessionData.client_secret);
 
       if (!clientSecret) {
         throw new Error('No ephemeral client_secret received from OpenAI session endpoint');
@@ -146,9 +146,8 @@ class OpenAIRealtimeClient {
       const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
 
-      // 7. Exchange SDP Offer with OpenAI WebRTC Gateway
-      const baseUrl = 'https://api.openai.com/v1/realtime';
-      const sdpResponse = await fetch(`${baseUrl}?model=${this.model}`, {
+      // 7. Exchange SDP Offer with OpenAI WebRTC Gateway (GA /calls then fallback)
+      let sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
         method: 'POST',
         body: offer.sdp,
         headers: {
@@ -156,6 +155,17 @@ class OpenAIRealtimeClient {
           'Content-Type': 'application/sdp'
         }
       });
+
+      if (!sdpResponse.ok) {
+        sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${this.model}`, {
+          method: 'POST',
+          body: offer.sdp,
+          headers: {
+            'Authorization': `Bearer ${clientSecret}`,
+            'Content-Type': 'application/sdp'
+          }
+        });
+      }
 
       if (!sdpResponse.ok) {
         const errText = await sdpResponse.text();
