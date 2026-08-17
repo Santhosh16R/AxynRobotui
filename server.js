@@ -1506,14 +1506,14 @@ Always acknowledge the conversation warmly and confirm when you begin driving to
 
 // PROXY SDP OFFER TO OPENAI (Eliminates browser CORS and corporate TLS inspection blocks)
 app.post('/api/realtime/sdp', async (req, res) => {
-  const { sdp, clientSecret, model } = req.body;
+  const { sdp, clientSecret } = req.body;
   if (!sdp || !clientSecret) {
     return res.status(400).json({ error: 'SDP offer and clientSecret are required' });
   }
 
   try {
-    // 1. Try GA /calls endpoint
-    let sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
+    // 1. Try GA /v1/realtime endpoint as instructed by OpenAI
+    let sdpResponse = await fetch('https://api.openai.com/v1/realtime', {
       method: 'POST',
       body: sdp,
       headers: {
@@ -1523,9 +1523,8 @@ app.post('/api/realtime/sdp', async (req, res) => {
     });
 
     if (!sdpResponse.ok) {
-      // 2. Fallback to model query param endpoint
-      const targetModel = model || 'gpt-4o-realtime-preview-2024-12-17';
-      sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${targetModel}`, {
+      // 2. Fallback to /v1/realtime/calls
+      sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
         method: 'POST',
         body: sdp,
         headers: {
