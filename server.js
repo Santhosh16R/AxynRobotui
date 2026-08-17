@@ -1372,19 +1372,36 @@ Always acknowledge the conversation warmly and confirm when you begin driving to
 
   const sessionObj = {
     type: 'realtime',
-    model: model,
-    voice: voice,
     instructions: systemInstructions,
-    modalities: ['audio', 'text'],
-    input_audio_transcription: {
-      model: 'whisper-1'
+    audio: {
+      input: {
+        format: {
+          type: 'audio/pcm',
+          rate: 24000
+        },
+        transcription: {
+          model: 'gpt-realtime-whisper'
+        },
+        noise_reduction: {
+          type: 'far_field'
+        },
+        turn_detection: {
+          type: 'server_vad',
+          threshold: 0.5,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 500,
+          idle_timeout_ms: null
+        }
+      },
+      output: {
+        format: {
+          type: 'audio/pcm',
+          rate: 24000
+        },
+        voice: voice || 'marin'
+      }
     },
-    turn_detection: {
-      type: 'server_vad',
-      threshold: 0.5,
-      prefix_padding_ms: 300,
-      silence_duration_ms: 500
-    },
+    output_modalities: ['audio'],
     tools: [
       {
         type: 'function',
@@ -1437,7 +1454,8 @@ Always acknowledge the conversation warmly and confirm when you begin driving to
           properties: {}
         }
       }
-    ]
+    ],
+    max_output_tokens: 'inf'
   };
 
   try {
