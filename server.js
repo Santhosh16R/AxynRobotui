@@ -1504,6 +1504,56 @@ Always acknowledge the conversation warmly and confirm when you begin driving to
   }
 });
 
+// PROXY SDP OFFER TO OPENAI (Eliminates browser CORS and corporate TLS inspection blocks)
+app.post('/api/realtime/sdp', async (req, res) => {
+  const { sdp, clientSecret, model } = req.body;
+  if (!sdp || !clientSecret) {
+    return res.status(400).json({ error: 'SDP offer and clientSecret are required' });
+  }
+
+  try {
+    // 1. Try GA /calls endpoint
+    let sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
+      method: 'POST',
+      body: sdp,
+      headers: {
+        'Authorization': `Bearer ${clientSecret}`,
+        'Content-Type': 'application/sdp'
+      }
+    });
+
+    if (!sdpResponse.ok) {
+      // 2. Fallback to model query param endpoint
+      const targetModel = model || 'gpt-4o-realtime-preview-2024-12-17';
+      sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${targetModel}`, {
+        method: 'POST',
+        body: sdp,
+        headers: {
+          'Authorization': `Bearer ${clientSecret}`,
+          'Content-Type': 'application/sdp'
+        }
+      });
+    }
+
+    if (!sdpResponse.ok) {
+      const errText = await sdpResponse.text();
+      addLog(`OpenAI SDP error: ${errText}`, 'error');
+      return res.status(sdpResponse.status).json({ error: `SDP negotiation failed: ${errText}` });
+    }
+
+    const answerSdp = await sdpResponse.text();
+    res.json({ sdp: answerSdp });
+  } catch (err) {
+    addLog(`SDP proxy error: ${err.message}`, 'error');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/realtime/connected-log', (req, res) => {
+  addLog('✨ OpenAI Realtime Voice connected via WebRTC! Live GPT-4o voice session active.', 'success');
+  res.json({ success: true });
+});
+
 // ==========================================
 // AUTOMATIC FULLSCREEN BROWSER LAUNCHER (Cross-Platform / Ubuntu / macOS / Windows)
 // ==========================================

@@ -146,39 +146,31 @@ class OpenAIRealtimeClient {
       const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
 
-      // 7. Exchange SDP Offer with OpenAI WebRTC Gateway (GA /calls then fallback)
-      let sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
+      // 7. Exchange SDP Offer with OpenAI WebRTC Gateway via Backend Proxy
+      const sdpProxyRes = await fetch('/api/realtime/sdp', {
         method: 'POST',
-        body: offer.sdp,
-        headers: {
-          'Authorization': `Bearer ${clientSecret}`,
-          'Content-Type': 'application/sdp'
-        }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sdp: offer.sdp,
+          clientSecret: clientSecret,
+          model: this.model
+        })
       });
 
-      if (!sdpResponse.ok) {
-        sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${this.model}`, {
-          method: 'POST',
-          body: offer.sdp,
-          headers: {
-            'Authorization': `Bearer ${clientSecret}`,
-            'Content-Type': 'application/sdp'
-          }
-        });
+      if (!sdpProxyRes.ok) {
+        const errData = await sdpProxyRes.json();
+        throw new Error(errData.error || 'SDP negotiation failed on server');
       }
 
-      if (!sdpResponse.ok) {
-        const errText = await sdpResponse.text();
-        throw new Error(`OpenAI SDP negotiation failed: ${errText}`);
-      }
-
-      const answerSdp = await sdpResponse.text();
-      const answer = { type: 'answer', sdp: answerSdp };
+      const sdpData = await sdpProxyRes.json();
+      const answer = { type: 'answer', sdp: sdpData.sdp };
       await this.peerConnection.setRemoteDescription(answer);
 
       this.isConnected = true;
       this.isConnecting = false;
+      this.isMuted = false;
       this.app.updateRealtimeUiState('connected');
+      fetch('/api/realtime/connected-log', { method: 'POST' }).catch(() => {});
       this.app.showToast('✨ Connected to OpenAI Realtime Voice (GPT-4o)', 'success');
       return true;
     } catch (err) {
@@ -189,9 +181,26 @@ class OpenAIRealtimeClient {
     }
   }
 
+  toggleMute() {
+    if (!this.localStream) return;
+    this.isMuted = !this.isMuted;
+    this.localStream.getAudioTracks().forEach(track => {
+      track.enabled = !this.isMuted;
+    });
+    if (this.isMuted) {
+      this.app.showToast('Microphone Muted (OpenAI Realtime Session Active)', 'info');
+      this.app.voice.setListeningState(false);
+    } else {
+      this.app.showToast('Microphone Active - Speak naturally', 'success');
+      this.app.voice.setListeningState(true);
+      this.app.voice.playChime('listen');
+    }
+  }
+
   disconnect() {
     this.isConnected = false;
     this.isConnecting = false;
+    this.isMuted = false;
 
     if (this.dataChannel) {
       this.dataChannel.close();

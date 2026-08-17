@@ -317,12 +317,17 @@ class VoiceAssistant {
     }
 
     if (this.engine === 'openai' && hasOpenAiKey) {
-      // Toggle OpenAI Realtime WebRTC Session
-      if (this.app.openaiRealtime && this.app.openaiRealtime.isConnected) {
-        this.app.openaiRealtime.disconnect();
-        this.setListeningState(false);
-        this.app.showToast('Disconnected OpenAI Realtime Voice', 'info');
-      } else if (this.app.openaiRealtime) {
+      if (!this.app.openaiRealtime) return;
+
+      if (this.app.openaiRealtime.isConnecting) {
+        this.app.showToast('Connecting in progress, please wait a moment...', 'info');
+        return;
+      }
+
+      if (this.app.openaiRealtime.isConnected) {
+        // Toggle mic mute/unmute without resetting connection
+        this.app.openaiRealtime.toggleMute();
+      } else {
         this.app.openaiRealtime.connect();
       }
       return;
