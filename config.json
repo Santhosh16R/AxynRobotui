@@ -17,7 +17,7 @@
     "initialBattery": 98,
     "dischargeRatePerMeter": 0.05,
     "chargeRatePerSecond": 0.2,
-    "lidarRange": 12.0,
+    "lidarRange": 12,
     "lidarFovDeg": 360,
     "lidarRayCount": 72
   },
@@ -25,16 +25,26 @@
     {
       "id": "tech_hq",
       "name": "Axyn Tech HQ - Ground Floor",
-      "dimensions": { "width": 50.0, "height": 35.0, "meterToPixel": 20 },
-      "dock": { "x": 5.0, "y": 5.0, "theta": 0, "name": "Charging Dock Alpha" },
+      "dimensions": {
+        "width": 50,
+        "height": 35,
+        "meterToPixel": 20
+      },
+      "dock": {
+        "x": 3.5,
+        "y": 6.5,
+        "theta": 0,
+        "name": "Charging Dock Alpha"
+      },
+      "knowledgeBase": "FACILITY GUIDELINES & VISITOR INFO:\n- Building Hours: Monday to Friday from 8:00 AM to 7:00 PM. Weekend badge access only.\n- Guest Wi-Fi: Connect to 'Axyn-Guest', password is 'Welcome2026!'.\n- Restrooms: Located near the Elevator Lobby (North Corridor) and beside Skyview Cafeteria.\n- Cafeteria Hours: Breakfast 8:30-10:30 AM, Lunch 11:30 AM-2:30 PM. Specialty coffee is available all day.\n- Security & Escort: All guests must wear their visitor badges. Axyn Robot is happy to guide visitors to any room upon voice request.",
       "pois": [
         {
           "id": "poi-1",
           "name": "Main Reception",
           "category": "Reception",
-          "x": 8.0,
-          "y": 8.0,
-          "theta": 0.0,
+          "x": 8,
+          "y": 8,
+          "theta": 0,
           "icon": "reception",
           "color": "#00e5ff",
           "description": "Visitor check-in desk, guest registration and badge kiosk."
@@ -43,8 +53,8 @@
           "id": "poi-2",
           "name": "Executive Boardroom",
           "category": "Meeting",
-          "x": 38.0,
-          "y": 7.0,
+          "x": 38,
+          "y": 7,
           "theta": 1.57,
           "icon": "meeting",
           "color": "#38ef7d",
@@ -54,8 +64,8 @@
           "id": "poi-3",
           "name": "Innovation & Robotics Lab",
           "category": "Engineering",
-          "x": 42.0,
-          "y": 28.0,
+          "x": 42,
+          "y": 28,
           "theta": 3.14,
           "icon": "lab",
           "color": "#f9d423",
@@ -65,8 +75,8 @@
           "id": "poi-4",
           "name": "Skyview Cafeteria & Lounge",
           "category": "Dining",
-          "x": 10.0,
-          "y": 27.0,
+          "x": 10,
+          "y": 27,
           "theta": -1.57,
           "icon": "cafe",
           "color": "#ff6b6b",
@@ -76,9 +86,9 @@
           "id": "poi-5",
           "name": "Auditorium & Demo Theater",
           "category": "Presentation",
-          "x": 25.0,
-          "y": 18.0,
-          "theta": 0.0,
+          "x": 25,
+          "y": 18,
+          "theta": 0,
           "icon": "auditorium",
           "color": "#a8ff78",
           "description": "Main presentation stage for product demos and keynote events."
@@ -87,8 +97,8 @@
           "id": "poi-6",
           "name": "Elevator Lobby & Access",
           "category": "Transit",
-          "x": 24.0,
-          "y": 6.0,
+          "x": 24,
+          "y": 6,
           "theta": 1.57,
           "icon": "elevator",
           "color": "#00c6ff",
@@ -98,52 +108,201 @@
           "id": "poi-7",
           "name": "Charging Dock Alpha",
           "category": "Station",
-          "x": 5.0,
-          "y": 5.0,
-          "theta": 0.0,
+          "x": 5,
+          "y": 5,
+          "theta": 0,
           "icon": "charge",
           "color": "#2af598",
           "description": "Axyn Autonomous Fast Induction Charging Bay."
         }
       ],
       "obstacles": [
-        { "x": 0, "y": 0, "w": 50, "h": 1.5, "type": "wall", "label": "North Perimeter Wall" },
-        { "x": 0, "y": 33.5, "w": 50, "h": 1.5, "type": "wall", "label": "South Perimeter Wall" },
-        { "x": 0, "y": 0, "w": 1.5, "h": 35, "type": "wall", "label": "West Perimeter Wall" },
-        { "x": 48.5, "y": 0, "w": 1.5, "h": 35, "type": "wall", "label": "East Perimeter Wall" },
-        { "x": 16.0, "y": 1.5, "w": 1.0, "h": 10.0, "type": "wall", "label": "Reception Divider" },
-        { "x": 30.0, "y": 1.5, "w": 1.0, "h": 4.0, "type": "wall", "label": "Boardroom West Wall (North)" },
-        { "x": 30.0, "y": 8.5, "w": 1.0, "h": 4.0, "type": "wall", "label": "Boardroom West Wall (South)" },
-        { "x": 30.0, "y": 12.5, "w": 18.5, "h": 1.0, "type": "wall", "label": "Boardroom South Wall" },
-        { "x": 1.5, "y": 20.0, "w": 7.0, "h": 1.0, "type": "wall", "label": "Cafeteria North Wall (West)" },
-        { "x": 12.0, "y": 20.0, "w": 4.5, "h": 1.0, "type": "wall", "label": "Cafeteria North Wall (East)" },
-        { "x": 16.5, "y": 20.0, "w": 1.0, "h": 13.5, "type": "wall", "label": "Cafeteria East Wall" },
-        { "x": 32.0, "y": 21.0, "w": 16.5, "h": 1.0, "type": "wall", "label": "Robotics Lab North Wall" },
-        { "x": 32.0, "y": 21.0, "w": 1.0, "h": 4.5, "type": "wall", "label": "Robotics Lab West Wall (North)" },
-        { "x": 32.0, "y": 29.0, "w": 1.0, "h": 4.5, "type": "wall", "label": "Robotics Lab West Wall (South)" },
-        { "x": 22.0, "y": 14.5, "w": 6.0, "h": 6.0, "type": "zone", "label": "Central Concourse Feature" }
+        {
+          "x": 0,
+          "y": 0,
+          "w": 50,
+          "h": 1.5,
+          "type": "wall",
+          "label": "North Perimeter Wall"
+        },
+        {
+          "x": 0,
+          "y": 33.5,
+          "w": 50,
+          "h": 1.5,
+          "type": "wall",
+          "label": "South Perimeter Wall"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1.5,
+          "h": 35,
+          "type": "wall",
+          "label": "West Perimeter Wall"
+        },
+        {
+          "x": 48.5,
+          "y": 0,
+          "w": 1.5,
+          "h": 35,
+          "type": "wall",
+          "label": "East Perimeter Wall"
+        },
+        {
+          "x": 30,
+          "y": 1.5,
+          "w": 1,
+          "h": 4,
+          "type": "wall",
+          "label": "Boardroom West Wall (North)"
+        },
+        {
+          "x": 30,
+          "y": 8.5,
+          "w": 1,
+          "h": 4,
+          "type": "wall",
+          "label": "Boardroom West Wall (South)"
+        },
+        {
+          "x": 30,
+          "y": 12.5,
+          "w": 18.5,
+          "h": 1,
+          "type": "wall",
+          "label": "Boardroom South Wall"
+        },
+        {
+          "x": 1.5,
+          "y": 20,
+          "w": 7,
+          "h": 1,
+          "type": "wall",
+          "label": "Cafeteria North Wall (West)"
+        },
+        {
+          "x": 12,
+          "y": 20,
+          "w": 4.5,
+          "h": 1,
+          "type": "wall",
+          "label": "Cafeteria North Wall (East)"
+        },
+        {
+          "x": 16.5,
+          "y": 20,
+          "w": 1,
+          "h": 13.5,
+          "type": "wall",
+          "label": "Cafeteria East Wall"
+        },
+        {
+          "x": 32,
+          "y": 21,
+          "w": 16.5,
+          "h": 1,
+          "type": "wall",
+          "label": "Robotics Lab North Wall"
+        },
+        {
+          "x": 32,
+          "y": 21,
+          "w": 1,
+          "h": 4.5,
+          "type": "wall",
+          "label": "Robotics Lab West Wall (North)"
+        },
+        {
+          "x": 32,
+          "y": 29,
+          "w": 1,
+          "h": 4.5,
+          "type": "wall",
+          "label": "Robotics Lab West Wall (South)"
+        },
+        {
+          "x": 22,
+          "y": 14.5,
+          "w": 6,
+          "h": 6,
+          "type": "zone",
+          "label": "Central Concourse Feature"
+        },
+        {
+          "x": 16,
+          "y": 1.5,
+          "w": 1,
+          "h": 13.5,
+          "type": "wall",
+          "label": "Custom Wall (16.0, 1.5)"
+        }
       ],
       "rooms": [
-        { "name": "Visitor Lobby", "x": 1.5, "y": 1.5, "w": 14.5, "h": 18.5, "color": "rgba(0, 229, 255, 0.04)" },
-        { "name": "Executive Boardroom", "x": 31.0, "y": 1.5, "w": 17.5, "h": 11.0, "color": "rgba(56, 239, 125, 0.04)" },
-        { "name": "Cafeteria & Rest Area", "x": 1.5, "y": 21.0, "w": 15.0, "h": 12.5, "color": "rgba(255, 107, 107, 0.04)" },
-        { "name": "Robotics Research Suite", "x": 33.0, "y": 22.0, "w": 15.5, "h": 11.5, "color": "rgba(249, 212, 35, 0.04)" },
-        { "name": "Central Concourse", "x": 17.0, "y": 1.5, "w": 13.0, "h": 32.0, "color": "rgba(255, 255, 255, 0.02)" }
+        {
+          "name": "Visitor Lobby",
+          "x": 1.5,
+          "y": 1.5,
+          "w": 14.5,
+          "h": 18.5,
+          "color": "rgba(0, 229, 255, 0.04)"
+        },
+        {
+          "name": "Executive Boardroom",
+          "x": 31,
+          "y": 1.5,
+          "w": 17.5,
+          "h": 11,
+          "color": "rgba(56, 239, 125, 0.04)"
+        },
+        {
+          "name": "Cafeteria & Rest Area",
+          "x": 1.5,
+          "y": 21,
+          "w": 15,
+          "h": 12.5,
+          "color": "rgba(255, 107, 107, 0.04)"
+        },
+        {
+          "name": "Robotics Research Suite",
+          "x": 33,
+          "y": 22,
+          "w": 15.5,
+          "h": 11.5,
+          "color": "rgba(249, 212, 35, 0.04)"
+        },
+        {
+          "name": "Central Concourse",
+          "x": 17,
+          "y": 1.5,
+          "w": 13,
+          "h": 32,
+          "color": "rgba(255, 255, 255, 0.02)"
+        }
       ]
     },
     {
       "id": "medical_center",
       "name": "Metropolitan Medical & Wellness Pavilion",
-      "dimensions": { "width": 45.0, "height": 30.0, "meterToPixel": 22 },
-      "dock": { "x": 4.0, "y": 4.0, "theta": 0, "name": "Medical Dock Bay 1" },
+      "dimensions": {
+        "width": 45,
+        "height": 30,
+        "meterToPixel": 22
+      },
+      "dock": {
+        "x": 4,
+        "y": 4,
+        "theta": 0,
+        "name": "Medical Dock Bay 1"
+      },
       "pois": [
         {
           "id": "med-1",
           "name": "Patient Welcome Kiosk",
           "category": "Reception",
-          "x": 7.0,
-          "y": 7.0,
-          "theta": 0.0,
+          "x": 7,
+          "y": 7,
+          "theta": 0,
           "icon": "reception",
           "color": "#00e5ff",
           "description": "Patient intake, appointment check-in, and triage guidance."
@@ -152,8 +311,8 @@
           "id": "med-2",
           "name": "Diagnostic Imaging Suite",
           "category": "Clinical",
-          "x": 35.0,
-          "y": 6.0,
+          "x": 35,
+          "y": 6,
           "theta": 1.57,
           "icon": "lab",
           "color": "#38ef7d",
@@ -163,8 +322,8 @@
           "id": "med-3",
           "name": "Specialist Consultation Wing",
           "category": "Clinical",
-          "x": 36.0,
-          "y": 24.0,
+          "x": 36,
+          "y": 24,
           "theta": 3.14,
           "icon": "meeting",
           "color": "#f9d423",
@@ -174,8 +333,8 @@
           "id": "med-4",
           "name": "Pharmacy & Dispensing",
           "category": "Services",
-          "x": 8.0,
-          "y": 24.0,
+          "x": 8,
+          "y": 24,
           "theta": -1.57,
           "icon": "cafe",
           "color": "#ff6b6b",
@@ -185,31 +344,129 @@
           "id": "med-5",
           "name": "Emergency Rapid Response",
           "category": "Emergency",
-          "x": 22.0,
-          "y": 6.0,
-          "theta": 0.0,
+          "x": 22,
+          "y": 6,
+          "theta": 0,
           "icon": "auditorium",
           "color": "#ff4757",
           "description": "Emergency triage intake and acute care unit."
         }
       ],
       "obstacles": [
-        { "x": 0, "y": 0, "w": 45, "h": 1.5, "type": "wall", "label": "North Wall" },
-        { "x": 0, "y": 28.5, "w": 45, "h": 1.5, "type": "wall", "label": "South Wall" },
-        { "x": 0, "y": 0, "w": 1.5, "h": 30, "type": "wall", "label": "West Wall" },
-        { "x": 43.5, "y": 0, "w": 1.5, "h": 30, "type": "wall", "label": "East Wall" },
-        { "x": 15.0, "y": 1.5, "w": 1.0, "h": 10.0, "type": "wall", "label": "Triage Partition" },
-        { "x": 28.0, "y": 1.5, "w": 1.0, "h": 10.0, "type": "wall", "label": "Imaging Partition" },
-        { "x": 15.0, "y": 18.0, "w": 1.0, "h": 10.5, "type": "wall", "label": "Pharmacy Partition" },
-        { "x": 28.0, "y": 18.0, "w": 1.0, "h": 10.5, "type": "wall", "label": "Consultation Partition" },
-        { "x": 19.0, "y": 13.0, "w": 7.0, "h": 4.0, "type": "zone", "label": "Central Nurses Hub" }
+        {
+          "x": 0,
+          "y": 0,
+          "w": 45,
+          "h": 1.5,
+          "type": "wall",
+          "label": "North Wall"
+        },
+        {
+          "x": 0,
+          "y": 28.5,
+          "w": 45,
+          "h": 1.5,
+          "type": "wall",
+          "label": "South Wall"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1.5,
+          "h": 30,
+          "type": "wall",
+          "label": "West Wall"
+        },
+        {
+          "x": 43.5,
+          "y": 0,
+          "w": 1.5,
+          "h": 30,
+          "type": "wall",
+          "label": "East Wall"
+        },
+        {
+          "x": 15,
+          "y": 1.5,
+          "w": 1,
+          "h": 10,
+          "type": "wall",
+          "label": "Triage Partition"
+        },
+        {
+          "x": 28,
+          "y": 1.5,
+          "w": 1,
+          "h": 10,
+          "type": "wall",
+          "label": "Imaging Partition"
+        },
+        {
+          "x": 15,
+          "y": 18,
+          "w": 1,
+          "h": 10.5,
+          "type": "wall",
+          "label": "Pharmacy Partition"
+        },
+        {
+          "x": 28,
+          "y": 18,
+          "w": 1,
+          "h": 10.5,
+          "type": "wall",
+          "label": "Consultation Partition"
+        },
+        {
+          "x": 19,
+          "y": 13,
+          "w": 7,
+          "h": 4,
+          "type": "zone",
+          "label": "Central Nurses Hub"
+        }
       ],
       "rooms": [
-        { "name": "Welcome & Triage", "x": 1.5, "y": 1.5, "w": 13.5, "h": 16.5, "color": "rgba(0, 229, 255, 0.04)" },
-        { "name": "Diagnostic Imaging", "x": 29.0, "y": 1.5, "w": 14.5, "h": 10.0, "color": "rgba(56, 239, 125, 0.04)" },
-        { "name": "Pharmacy Services", "x": 1.5, "y": 18.0, "w": 13.5, "h": 10.5, "color": "rgba(255, 107, 107, 0.04)" },
-        { "name": "Specialist Clinic", "x": 29.0, "y": 18.0, "w": 14.5, "h": 10.5, "color": "rgba(249, 212, 35, 0.04)" },
-        { "name": "Main Corridor", "x": 15.0, "y": 11.5, "w": 14.0, "h": 7.0, "color": "rgba(255, 255, 255, 0.02)" }
+        {
+          "name": "Welcome & Triage",
+          "x": 1.5,
+          "y": 1.5,
+          "w": 13.5,
+          "h": 16.5,
+          "color": "rgba(0, 229, 255, 0.04)"
+        },
+        {
+          "name": "Diagnostic Imaging",
+          "x": 29,
+          "y": 1.5,
+          "w": 14.5,
+          "h": 10,
+          "color": "rgba(56, 239, 125, 0.04)"
+        },
+        {
+          "name": "Pharmacy Services",
+          "x": 1.5,
+          "y": 18,
+          "w": 13.5,
+          "h": 10.5,
+          "color": "rgba(255, 107, 107, 0.04)"
+        },
+        {
+          "name": "Specialist Clinic",
+          "x": 29,
+          "y": 18,
+          "w": 14.5,
+          "h": 10.5,
+          "color": "rgba(249, 212, 35, 0.04)"
+        },
+        {
+          "name": "Main Corridor",
+          "x": 15,
+          "y": 11.5,
+          "w": 14,
+          "h": 7,
+          "color": "rgba(255, 255, 255, 0.02)"
+        }
       ]
     }
   ]

@@ -1126,6 +1126,7 @@ app.post('/api/realtime/session', (req, res) => {
   }
 
   const poisListStr = activeMap.pois.map(p => `- "${p.name}" (Category: ${p.category}): ${p.description || 'Waypoint'}`).join('\n');
+  const facilityKnowledge = (req.body && req.body.knowledgeBase) || activeMap.knowledgeBase || config.knowledgeBase || '';
 
   const systemInstructions = `You are Axyn Concierge, a state-of-the-art, charming, warm, and highly capable autonomous robot concierge developed by Axyn Robotics.
 You are currently active at "${activeMap.name}".
@@ -1135,7 +1136,7 @@ YOUR PERSONALITY & CONVERSATION STYLE:
 - Keep spoken responses concise and conversational (usually 1-3 natural sentences) so conversations feel lively and snappy.
 - You have real-time autonomous physical movement capabilities via tools.
 
-CURRENT FACILITY DESTINATIONS:
+${facilityKnowledge ? `FACILITY KNOWLEDGE BASE & VISITOR FAQ:\n${facilityKnowledge}\n\n` : ''}CURRENT FACILITY DESTINATIONS:
 ${poisListStr}
 
 CURRENT ROBOT TELEMETRY:

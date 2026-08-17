@@ -122,6 +122,7 @@ class AxynApp {
       voiceSettingsForm: document.getElementById('voiceSettingsForm'),
       openaiApiKeySettings: document.getElementById('openaiApiKeySettings'),
       openaiVoiceSelectSettings: document.getElementById('openaiVoiceSelectSettings'),
+      facilityKnowledgeBase: document.getElementById('facilityKnowledgeBase'),
       robotKinematicsForm: document.getElementById('robotKinematicsForm'),
       robotMaxSpeed: document.getElementById('robotMaxSpeed'),
       robotMaxTurn: document.getElementById('robotMaxTurn'),
@@ -804,14 +805,23 @@ class AxynApp {
     if (this.dom.voiceSettingsForm) {
       this.dom.voiceSettingsForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const key = this.dom.openaiApiKeySettings.value.trim();
-        const voice = this.dom.openaiVoiceSelectSettings.value;
+        const key = this.dom.openaiApiKeySettings ? this.dom.openaiApiKeySettings.value.trim() : '';
+        const voice = this.dom.openaiVoiceSelectSettings ? this.dom.openaiVoiceSelectSettings.value : 'alloy';
+        const kb = this.dom.facilityKnowledgeBase ? this.dom.facilityKnowledgeBase.value.trim() : '';
+
         if (this.openaiRealtime) {
           this.openaiRealtime.setApiKey(key);
           this.openaiRealtime.setVoice(voice);
         }
+        localStorage.setItem('axyn_knowledge_base', kb);
+
+        if (this.activeMap) {
+          this.activeMap.knowledgeBase = kb;
+          this.saveMapToServer();
+        }
+
         closeSettings();
-        this.showToast('✨ Voice AI configuration updated', 'success');
+        this.showToast('✨ Voice AI & Knowledge Base updated', 'success');
       });
     }
 
@@ -912,6 +922,10 @@ class AxynApp {
     if (this.openaiRealtime) {
       if (this.dom.openaiApiKeySettings) this.dom.openaiApiKeySettings.value = this.openaiRealtime.apiKey || '';
       if (this.dom.openaiVoiceSelectSettings) this.dom.openaiVoiceSelectSettings.value = this.openaiRealtime.voice || 'alloy';
+    }
+
+    if (this.dom.facilityKnowledgeBase) {
+      this.dom.facilityKnowledgeBase.value = (this.activeMap && this.activeMap.knowledgeBase) || localStorage.getItem('axyn_knowledge_base') || '';
     }
 
     this.updateSettingsEditorTables();

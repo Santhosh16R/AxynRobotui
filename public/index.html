@@ -789,8 +789,13 @@
                   <input type="text" value="gpt-4o-realtime-preview-2024-12-17" disabled />
                 </div>
               </div>
+              <div class="form-group">
+                <label for="facilityKnowledgeBase">Facility Knowledge Base, Guidelines & FAQ</label>
+                <textarea id="facilityKnowledgeBase" rows="7" style="width: 100%; border-radius: 12px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); color: var(--text-main); font-family: var(--font-sans); font-size: 13px; line-height: 1.5; resize: vertical;" placeholder="Enter building hours, Wi-Fi info, cafeteria menus, key contacts, parking rules, restroom locations, and visitor FAQs..."></textarea>
+                <span class="field-hint">This domain knowledge is provided directly to OpenAI Realtime (GPT-4o) so the robot can converse accurately about the building, services, and policies.</span>
+              </div>
               <div class="form-actions-right">
-                <button type="submit" class="btn-primary">Save Voice Settings</button>
+                <button type="submit" class="btn-primary">Save Voice & Knowledge Settings</button>
               </div>
             </form>
           </div>

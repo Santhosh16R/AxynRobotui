@@ -57,13 +57,15 @@ class OpenAIRealtimeClient {
 
     try {
       // 1. Request Ephemeral Session Token from Server
+      const kb = (this.app && this.app.activeMap && this.app.activeMap.knowledgeBase) || localStorage.getItem('axyn_knowledge_base') || '';
       const sessionRes = await fetch('/api/realtime/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey: this.apiKey,
           voice: this.voice,
-          model: this.model
+          model: this.model,
+          knowledgeBase: kb
         })
       });
 
