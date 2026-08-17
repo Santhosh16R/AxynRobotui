@@ -34,6 +34,13 @@ class MapEngine {
     // Particle Animation State for Trajectory Path
     this.pathParticleOffset = 0;
 
+    // Map Editor State
+    this.isEditing = false;
+    this.editorTool = 'pan'; // 'pan' | 'wall' | 'zone' | 'poi' | 'dock' | 'erase'
+    this.editorSnap = 0.5; // 0.5m | 1.0m | 0 (free)
+    this.drawStartWorld = null;
+    this.tempBox = null;
+
     // DOM Elements
     this.dom = {
       wrapper: document.getElementById('canvasWrapper'),
@@ -49,11 +56,25 @@ class MapEngine {
       btnCenterRobot: document.getElementById('btnCenterRobot'),
       btnResetView: document.getElementById('btnResetView'),
       instructionText: document.getElementById('instructionText'),
-      mapInstruction: document.getElementById('mapInstruction')
+      mapInstruction: document.getElementById('mapInstruction'),
+
+      // Map Editor DOM
+      mapEditorToolbar: document.getElementById('mapEditorToolbar'),
+      btnToolPan: document.getElementById('btnToolPan'),
+      btnToolWall: document.getElementById('btnToolWall'),
+      btnToolZone: document.getElementById('btnToolZone'),
+      btnToolPoi: document.getElementById('btnToolPoi'),
+      btnToolDock: document.getElementById('btnToolDock'),
+      btnToolErase: document.getElementById('btnToolErase'),
+      btnEditorSnap: document.getElementById('btnEditorSnap'),
+      snapText: document.getElementById('snapText'),
+      btnEditorSave: document.getElementById('btnEditorSave'),
+      btnEditorClose: document.getElementById('btnEditorClose')
     };
 
     this.initCanvasSize();
     this.initEventListeners();
+    this.initEditorToolbarEvents();
     this.startRenderLoop();
   }
 
@@ -209,12 +230,48 @@ class MapEngine {
       this.renderTarget(this.app.robotState.target);
     }
 
+    // 11. Render Live Map Editor Dragging Preview
+    if (this.isEditing && this.tempBox) {
+      this.renderEditorPreview(this.tempBox);
+    }
+
     ctx.restore();
   }
 
   // ==========================================
   // MAP ELEMENTS RENDERING
   // ==========================================
+  renderEditorPreview(box) {
+    const ctx = this.ctx;
+    ctx.save();
+    const p1 = this.worldToScreen(box.x, box.y);
+    const p2 = this.worldToScreen(box.x + box.w, box.y + box.h);
+    const w = p2.x - p1.x;
+    const h = p2.y - p1.y;
+
+    if (this.editorTool === 'wall') {
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.35)';
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.fillRect(p1.x, p1.y, w, h);
+      ctx.strokeRect(p1.x, p1.y, w, h);
+    } else if (this.editorTool === 'zone') {
+      ctx.fillStyle = 'rgba(255, 71, 87, 0.35)';
+      ctx.strokeStyle = '#ff4757';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.fillRect(p1.x, p1.y, w, h);
+      ctx.strokeRect(p1.x, p1.y, w, h);
+    }
+
+    // Coordinate Label
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.fillText(`${Math.abs(box.w).toFixed(1)}m × ${Math.abs(box.h).toFixed(1)}m`, p1.x + 4, p1.y - 6);
+    ctx.restore();
+  }
   renderGrid(mapW, mapH) {
     const ctx = this.ctx;
     ctx.save();
@@ -536,20 +593,132 @@ class MapEngine {
   }
 
   // ==========================================
+  // MAP EDITOR INTERACTIVE CONTROLS
+  // ==========================================
+  initEditorToolbarEvents() {
+    if (!this.dom.mapEditorToolbar) return;
+
+    // Tool switching
+    const toolBtns = [
+      { btn: this.dom.btnToolPan, tool: 'pan' },
+      { btn: this.dom.btnToolWall, tool: 'wall' },
+      { btn: this.dom.btnToolZone, tool: 'zone' },
+      { btn: this.dom.btnToolPoi, tool: 'poi' },
+      { btn: this.dom.btnToolDock, tool: 'dock' },
+      { btn: this.dom.btnToolErase, tool: 'erase' }
+    ];
+
+    toolBtns.forEach(({ btn, tool }) => {
+      if (btn) {
+        btn.addEventListener('click', () => this.setEditorTool(tool));
+      }
+    });
+
+    // Snap to grid cycle
+    if (this.dom.btnEditorSnap) {
+      this.dom.btnEditorSnap.addEventListener('click', () => {
+        if (this.editorSnap === 0.5) {
+          this.editorSnap = 1.0;
+          this.dom.snapText.textContent = '🧲 Snap: 1.0m';
+        } else if (this.editorSnap === 1.0) {
+          this.editorSnap = 0;
+          this.dom.snapText.textContent = '🔓 Snap: Free';
+        } else {
+          this.editorSnap = 0.5;
+          this.dom.snapText.textContent = '🧲 Snap: 0.5m';
+        }
+      });
+    }
+
+    // Save map button
+    if (this.dom.btnEditorSave) {
+      this.dom.btnEditorSave.addEventListener('click', () => {
+        this.app.saveMapToServer();
+      });
+    }
+
+    // Exit editor mode
+    if (this.dom.btnEditorClose) {
+      this.dom.btnEditorClose.addEventListener('click', () => {
+        this.exitEditorMode();
+      });
+    }
+  }
+
+  enterEditorMode() {
+    this.isEditing = true;
+    this.setEditorTool('wall');
+    if (this.dom.mapEditorToolbar) {
+      this.dom.mapEditorToolbar.style.display = 'flex';
+    }
+    if (this.dom.instructionText) {
+      this.dom.instructionText.textContent = 'Map Editor Active: Click and drag to draw walls / zones or place POIs.';
+    }
+    this.app.showToast('Map Editor Mode Activated. Draw walls or drop POIs directly on the canvas.', 'info');
+  }
+
+  exitEditorMode() {
+    this.isEditing = false;
+    this.tempBox = null;
+    this.drawStartWorld = null;
+    if (this.dom.mapEditorToolbar) {
+      this.dom.mapEditorToolbar.style.display = 'none';
+    }
+    this.setMode('navigate');
+  }
+
+  setEditorTool(tool) {
+    this.editorTool = tool;
+    const tools = ['pan', 'wall', 'zone', 'poi', 'dock', 'erase'];
+    tools.forEach(t => {
+      const btn = this.dom[`btnTool${t.charAt(0).toUpperCase() + t.slice(1)}`];
+      if (btn) btn.classList.toggle('active', t === tool);
+    });
+
+    if (tool === 'pan') {
+      this.canvas.style.cursor = 'grab';
+    } else if (tool === 'wall' || tool === 'zone') {
+      this.canvas.style.cursor = 'crosshair';
+    } else if (tool === 'poi' || tool === 'dock') {
+      this.canvas.style.cursor = 'cell';
+    } else if (tool === 'erase') {
+      this.canvas.style.cursor = 'not-allowed';
+    }
+  }
+
+  applySnap(val) {
+    if (this.editorSnap <= 0) return val;
+    return Math.round(val / this.editorSnap) * this.editorSnap;
+  }
+
+  // ==========================================
   // EVENT HANDLERS & INTERACTION
   // ==========================================
   initEventListeners() {
     window.addEventListener('resize', () => this.initCanvasSize());
 
-    // Mouse Down (Start Pan or Click)
+    // Mouse Down (Start Pan or Draw)
     this.canvas.addEventListener('mousedown', (e) => {
-      this.isDragging = true;
-      this.dragStartX = e.clientX - this.panX;
-      this.dragStartY = e.clientY - this.panY;
-      this.hasMoved = false;
+      const rect = this.canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const world = this.screenToWorld(sx, sy);
+
+      if (this.isEditing && (this.editorTool === 'wall' || this.editorTool === 'zone')) {
+        // Start dragging rectangle
+        const snapX = this.applySnap(world.x);
+        const snapY = this.applySnap(world.y);
+        this.drawStartWorld = { x: snapX, y: snapY };
+        this.tempBox = { x: snapX, y: snapY, w: 0.1, h: 0.1 };
+      } else {
+        this.isDragging = true;
+        this.dragStartX = e.clientX - this.panX;
+        this.dragStartY = e.clientY - this.panY;
+        this.hasMoved = false;
+      }
     });
 
-    // Mouse Move (Pan / Hover Tracker)
+    // Mouse Move (Pan / Hover / Draw Preview)
     this.canvas.addEventListener('mousemove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
@@ -563,7 +732,15 @@ class MapEngine {
         this.dom.cursorCoords.textContent = `${world.x.toFixed(1)} m, ${world.y.toFixed(1)} m`;
       }
 
-      if (this.isDragging) {
+      if (this.isEditing && this.drawStartWorld && (this.editorTool === 'wall' || this.editorTool === 'zone')) {
+        const curX = this.applySnap(world.x);
+        const curY = this.applySnap(world.y);
+        const minX = Math.min(this.drawStartWorld.x, curX);
+        const minY = Math.min(this.drawStartWorld.y, curY);
+        const w = Math.max(0.5, Math.abs(curX - this.drawStartWorld.x));
+        const h = Math.max(0.5, Math.abs(curY - this.drawStartWorld.y));
+        this.tempBox = { x: minX, y: minY, w: w, h: h };
+      } else if (this.isDragging) {
         this.hasMoved = true;
         this.panX = e.clientX - this.dragStartX;
         this.panY = e.clientY - this.dragStartY;
@@ -573,13 +750,40 @@ class MapEngine {
       }
     });
 
-    // Mouse Up (Dispatch Navigate or Waypoint creation)
+    // Mouse Up (Commit Draw or Dispatch Click)
     this.canvas.addEventListener('mouseup', (e) => {
-      if (!this.hasMoved) {
-        const rect = this.canvas.getBoundingClientRect();
-        const sx = e.clientX - rect.left;
-        const sy = e.clientY - rect.top;
-        const world = this.screenToWorld(sx, sy);
+      const rect = this.canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const world = this.screenToWorld(sx, sy);
+
+      if (this.isEditing && this.drawStartWorld && this.tempBox) {
+        // Finish drawing wall / zone
+        const snapX = this.applySnap(world.x);
+        const snapY = this.applySnap(world.y);
+        const minX = Math.min(this.drawStartWorld.x, snapX);
+        const minY = Math.min(this.drawStartWorld.y, snapY);
+        const w = Math.max(0.5, Math.abs(snapX - this.drawStartWorld.x));
+        const h = Math.max(0.5, Math.abs(snapY - this.drawStartWorld.y));
+
+        if (this.app.activeMap) {
+          if (!this.app.activeMap.obstacles) this.app.activeMap.obstacles = [];
+          const newObs = {
+            x: parseFloat(minX.toFixed(1)),
+            y: parseFloat(minY.toFixed(1)),
+            w: parseFloat(w.toFixed(1)),
+            h: parseFloat(h.toFixed(1)),
+            type: this.editorTool === 'wall' ? 'wall' : 'zone',
+            label: this.editorTool === 'wall' ? `Custom Wall (${minX.toFixed(1)}, ${minY.toFixed(1)})` : `Restricted Zone`
+          };
+          this.app.activeMap.obstacles.push(newObs);
+          this.app.showToast(`Added ${newObs.type}: ${newObs.label}`, 'success');
+          if (this.app.updateSettingsEditorTables) this.app.updateSettingsEditorTables();
+        }
+
+        this.drawStartWorld = null;
+        this.tempBox = null;
+      } else if (!this.hasMoved) {
         this.handleCanvasClick(world.x, world.y);
       }
       this.isDragging = false;
@@ -587,6 +791,8 @@ class MapEngine {
 
     this.canvas.addEventListener('mouseleave', () => {
       this.isDragging = false;
+      this.drawStartWorld = null;
+      this.tempBox = null;
     });
 
     // Mouse Wheel (Zoom at cursor position)
@@ -653,7 +859,9 @@ class MapEngine {
       }
     }
     this.hoveredPoi = found;
-    this.canvas.style.cursor = found ? 'pointer' : (this.mode === 'addPoi' ? 'cell' : 'crosshair');
+    if (!this.isEditing) {
+      this.canvas.style.cursor = found ? 'pointer' : (this.mode === 'addPoi' ? 'cell' : 'crosshair');
+    }
   }
 
   handleCanvasClick(wx, wy) {
@@ -663,6 +871,24 @@ class MapEngine {
     const mapDim = this.app.activeMap.dimensions;
     if (wx < 0 || wx > mapDim.width || wy < 0 || wy > mapDim.height) {
       this.app.showToast('Clicked point is outside the floorplan bounds.', 'warn');
+      return;
+    }
+
+    if (this.isEditing) {
+      if (this.editorTool === 'poi') {
+        const snapX = this.applySnap(wx);
+        const snapY = this.applySnap(wy);
+        this.app.openAddPoiModal(parseFloat(snapX.toFixed(1)), parseFloat(snapY.toFixed(1)));
+      } else if (this.editorTool === 'dock') {
+        const snapX = this.applySnap(wx);
+        const snapY = this.applySnap(wy);
+        this.app.activeMap.dock.x = parseFloat(snapX.toFixed(1));
+        this.app.activeMap.dock.y = parseFloat(snapY.toFixed(1));
+        this.app.showToast(`Relocated Charging Dock Base to (${snapX.toFixed(1)}m, ${snapY.toFixed(1)}m)`, 'success');
+        if (this.app.updateSettingsEditorTables) this.app.updateSettingsEditorTables();
+      } else if (this.editorTool === 'erase') {
+        this.handleEraserClick(wx, wy);
+      }
       return;
     }
 
@@ -683,5 +909,36 @@ class MapEngine {
       // Open New POI modal with pre-filled coords
       this.app.openAddPoiModal(parseFloat(wx.toFixed(2)), parseFloat(wy.toFixed(2)));
     }
+  }
+
+  handleEraserClick(wx, wy) {
+    if (!this.app.activeMap) return;
+
+    // 1. Check if clicked near a POI
+    if (this.app.activeMap.pois) {
+      const poiIndex = this.app.activeMap.pois.findIndex(p => Math.hypot(p.x - wx, p.y - wy) < 1.5);
+      if (poiIndex >= 0) {
+        const deleted = this.app.activeMap.pois.splice(poiIndex, 1)[0];
+        this.app.showToast(`Erased Destination: ${deleted.name}`, 'info');
+        this.app.renderPois();
+        if (this.app.updateSettingsEditorTables) this.app.updateSettingsEditorTables();
+        return;
+      }
+    }
+
+    // 2. Check if clicked inside an obstacle / wall
+    if (this.app.activeMap.obstacles) {
+      const obsIndex = this.app.activeMap.obstacles.findIndex(obs => {
+        return wx >= obs.x - 0.5 && wx <= obs.x + obs.w + 0.5 && wy >= obs.y - 0.5 && wy <= obs.y + obs.h + 0.5;
+      });
+      if (obsIndex >= 0) {
+        const deleted = this.app.activeMap.obstacles.splice(obsIndex, 1)[0];
+        this.app.showToast(`Erased ${deleted.type || 'wall'}: ${deleted.label || 'Wall Segment'}`, 'info');
+        if (this.app.updateSettingsEditorTables) this.app.updateSettingsEditorTables();
+        return;
+      }
+    }
+
+    this.app.showToast('No wall or destination found at clicked point to erase.', 'warn');
   }
 }

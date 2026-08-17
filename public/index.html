@@ -68,7 +68,15 @@
         </div>
       </div>
 
-      <div class="header-right">
+        <!-- Settings & Map Customizer Button -->
+        <button id="btnOpenSettings" class="ios-pill-btn btn-settings" title="Settings & Map Editor">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+
         <!-- Fullscreen Face Toggle Button -->
         <button id="btnToggleFullscreenFace" class="ios-pill-btn btn-fullscreen-toggle" title="Toggle Fullscreen Robotic Face Kiosk Mode">
           <svg id="fullscreenIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -421,6 +429,45 @@
             <!-- CANVAS VIEWPORT -->
             <div class="canvas-wrapper" id="canvasWrapper">
               <canvas id="mapCanvas"></canvas>
+              <!-- FLOATING INTERACTIVE MAP EDITOR TOOLBAR (Appears when editing map) -->
+              <div class="map-editor-floating-toolbar" id="mapEditorToolbar" style="display: none;">
+                <div class="editor-hud-badge">
+                  <span class="editor-pulse-dot"></span>
+                  <span>MAP EDITOR</span>
+                </div>
+                <div class="editor-tools-group">
+                  <button id="btnToolPan" class="editor-tool-btn active" data-tool="pan" title="Pan / View Map">
+                    <span>🖐️ Pan</span>
+                  </button>
+                  <button id="btnToolWall" class="editor-tool-btn" data-tool="wall" title="Draw Wall Barrier (Click & Drag or 2 Points)">
+                    <span>✏️ Wall</span>
+                  </button>
+                  <button id="btnToolZone" class="editor-tool-btn" data-tool="zone" title="Draw No-Go Forbidden Zone">
+                    <span>🚫 No-Go Zone</span>
+                  </button>
+                  <button id="btnToolPoi" class="editor-tool-btn" data-tool="poi" title="Place Navigation Destination (Click on Map)">
+                    <span>📍 Add POI</span>
+                  </button>
+                  <button id="btnToolDock" class="editor-tool-btn" data-tool="dock" title="Set Charging Dock Location (Click on Map)">
+                    <span>⚡ Move Dock</span>
+                  </button>
+                  <button id="btnToolErase" class="editor-tool-btn" data-tool="erase" title="Eraser (Click Wall/Zone/POI to delete)">
+                    <span>🧹 Erase</span>
+                  </button>
+                </div>
+                <div class="editor-divider"></div>
+                <div class="editor-actions-group">
+                  <button id="btnEditorSnap" class="editor-action-btn" title="Toggle Snap to Grid (0.5m / Free)">
+                    <span id="snapText">🧲 Snap: 0.5m</span>
+                  </button>
+                  <button id="btnEditorSave" class="editor-action-btn btn-save" title="Save Custom Map Changes to Server">
+                    <span>💾 Save Map</span>
+                  </button>
+                  <button id="btnEditorClose" class="editor-action-btn btn-close-editor" title="Exit Map Editor Mode">
+                    <span>✖️ Done</span>
+                  </button>
+                </div>
+              </div>
 
               <!-- Interaction Hint Overlay -->
               <div class="map-instruction-overlay" id="mapInstruction">
@@ -522,69 +569,49 @@
         <!-- TAB 2: DESTINATIONS & POIS -->
         <div class="tab-pane" id="tab-pois">
           <div class="pois-header">
-            <div>
-              <h3 class="pane-title">Points of Interest</h3>
-              <p class="pane-subtitle">Select a destination to dispatch the robot</p>
-            </div>
+            <h3 class="pane-title">Building Destinations</h3>
             <button id="btnOpenAddPoiModal" class="btn-sm btn-primary">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>New POI</span>
+              <span>Add Destination</span>
             </button>
           </div>
-
-          <div class="pois-list" id="poisList">
-            <!-- Dynamic POI Cards rendered by JS -->
+          <div class="pois-grid" id="poisList">
+            <!-- Dynamic POI Cards -->
           </div>
         </div>
 
-        <!-- TAB 3: MANUAL TELEOPERATION -->
+        <!-- TAB 3: TELEOPERATION CONTROLLER -->
         <div class="tab-pane" id="tab-teleop">
-          <div class="teleop-card">
-            <h3 class="pane-title">Manual Robot Teleoperation</h3>
-            <p class="pane-subtitle">Use virtual joystick or keyboard arrows (W/A/S/D) to navigate manually</p>
-
-            <!-- Joystick Area -->
-            <div class="joystick-wrapper">
-              <div class="joystick-base" id="joystickBase">
-                <div class="joystick-ring ring-1"></div>
-                <div class="joystick-ring ring-2"></div>
-                <div class="joystick-axis-y"></div>
-                <div class="joystick-axis-x"></div>
-                <div class="joystick-stick" id="joystickStick">
-                  <div class="stick-knob"></div>
+          <div class="teleop-container">
+            <div class="teleop-card">
+              <h3 class="pane-title">Virtual Joystick Teleoperation</h3>
+              <p class="teleop-desc">Control linear velocity and angular steering. Keyboard: W/A/S/D or Arrow Keys.</p>
+              
+              <div class="joystick-zone" id="joystickZone">
+                <div class="joystick-base">
+                  <div class="joystick-stick" id="joystickStick"></div>
                 </div>
               </div>
-            </div>
 
-            <!-- Direction Buttons D-Pad -->
-            <div class="dpad-grid">
-              <button class="dpad-btn btn-up" id="btnDpadUp" title="Move Forward (W)">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 4l-8 8h16z"></path></svg>
-              </button>
-              <button class="dpad-btn btn-left" id="btnDpadLeft" title="Rotate Left (A)">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 12l8-8v16z"></path></svg>
-              </button>
-              <button class="dpad-btn btn-center" id="btnDpadStop" title="Stop (Space)">
-                <circle cx="12" cy="12" r="6"></circle>
-              </button>
-              <button class="dpad-btn btn-right" id="btnDpadRight" title="Rotate Right (D)">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 12l-8-8v16z"></path></svg>
-              </button>
-              <button class="dpad-btn btn-down" id="btnDpadDown" title="Move Backward (S)">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 20l-8-8h16z"></path></svg>
-              </button>
-            </div>
-
-            <!-- Speed Limit Slider -->
-            <div class="speed-control-slider">
-              <div class="slider-header">
-                <span>Speed Scaling</span>
-                <span id="speedValue">100% (1.2 m/s)</span>
+              <!-- D-Pad Fallback Controls -->
+              <div class="dpad-container">
+                <button class="dpad-btn dpad-up" data-dir="forward" title="Forward (W)">▲</button>
+                <div class="dpad-row">
+                  <button class="dpad-btn dpad-left" data-dir="left" title="Turn Left (A)">◀</button>
+                  <button class="dpad-btn dpad-stop" data-dir="stop" title="Stop (Space)">■</button>
+                  <button class="dpad-btn dpad-right" data-dir="right" title="Turn Right (D)">▶</button>
+                </div>
+                <button class="dpad-btn dpad-down" data-dir="backward" title="Reverse (S)">▼</button>
               </div>
-              <input type="range" id="speedSlider" min="20" max="100" value="100" step="10" />
+
+              <!-- Speed Presets -->
+              <div class="speed-slider-group">
+                <label>Max Linear Speed: <span id="linearSpeedVal">1.0 m/s</span></label>
+                <input type="range" id="sliderLinearSpeed" min="0.2" max="2.0" step="0.1" value="1.0" />
+              </div>
             </div>
           </div>
         </div>
@@ -601,6 +628,228 @@
         </div>
       </section>
     </main>
+
+    <!-- ===================================================================
+         UNIFIED SETTINGS & MAP EDITOR MODAL
+         =================================================================== -->
+    <div class="modal-overlay" id="settingsModal" style="display: none;">
+      <div class="modal-card modal-card-large ios-glass-card">
+        <div class="modal-header">
+          <div class="settings-modal-title">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <h3>Settings & Configuration</h3>
+          </div>
+          <button class="modal-close-btn" id="btnCloseSettingsModal">&times;</button>
+        </div>
+
+        <!-- Settings Segmented Tabs -->
+        <div class="settings-tabs-bar ios-segmented-control">
+          <button class="settings-tab-btn active" data-tab="set-map">
+            <span>🗺️ Map Editor & Customizer</span>
+          </button>
+          <button class="settings-tab-btn" data-tab="set-voice">
+            <span>✨ AI & Voice</span>
+          </button>
+          <button class="settings-tab-btn" data-tab="set-robot">
+            <span>🤖 Robot Kinematics</span>
+          </button>
+          <button class="settings-tab-btn" data-tab="set-backup">
+            <span>💾 Backup & JSON</span>
+          </button>
+        </div>
+
+        <div class="settings-modal-content">
+          <!-- 1. MAP EDITOR & CUSTOMIZATION TAB -->
+          <div class="settings-pane active" id="set-map">
+            <div class="map-editor-cta-card">
+              <div class="editor-cta-info">
+                <h4>Interactive Canvas Map Editor</h4>
+                <p>Draw custom walls, place restricted no-go zones, add destination points, and relocate the charging dock directly on the interactive floorplan canvas.</p>
+              </div>
+              <button id="btnLaunchCanvasEditor" class="btn-primary btn-launch-editor">
+                <span>✏️ Open Visual Canvas Editor</span>
+              </button>
+            </div>
+
+            <form id="mapPropertiesForm" class="settings-section-card">
+              <h4>Floorplan Properties</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editMapName">Floorplan Name</label>
+                  <input type="text" id="editMapName" required />
+                </div>
+                <div class="form-group">
+                  <label for="editMapId">Map Identifier</label>
+                  <input type="text" id="editMapId" readonly />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editMapWidth">Building Width (m)</label>
+                  <input type="number" id="editMapWidth" step="1" min="10" max="200" required />
+                </div>
+                <div class="form-group">
+                  <label for="editMapHeight">Building Height (m)</label>
+                  <input type="number" id="editMapHeight" step="1" min="10" max="200" required />
+                </div>
+              </div>
+
+              <h4>Autonomous Charging Dock Location</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editDockName">Dock Name</label>
+                  <input type="text" id="editDockName" required />
+                </div>
+                <div class="form-group">
+                  <label for="editDockX">Dock X (m)</label>
+                  <input type="number" id="editDockX" step="0.5" required />
+                </div>
+                <div class="form-group">
+                  <label for="editDockY">Dock Y (m)</label>
+                  <input type="number" id="editDockY" step="0.5" required />
+                </div>
+              </div>
+              <div class="form-actions-right">
+                <button type="submit" class="btn-primary">💾 Save Floorplan Properties</button>
+              </div>
+            </form>
+
+            <!-- Custom POIs & Walls Quick Lists -->
+            <div class="settings-section-card">
+              <div class="section-title-row">
+                <h4>Destinations on this Map (<span id="editorPoiCount">0</span>)</h4>
+                <button type="button" id="btnEditorAddPoi" class="btn-sm btn-secondary">+ Add Destination</button>
+              </div>
+              <div class="editor-table-wrap">
+                <table class="editor-table" id="editorPoisTable">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Coordinates</th>
+                      <th>Color</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="editorPoisTbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="settings-section-card">
+              <div class="section-title-row">
+                <h4>Walls & Obstacles (<span id="editorWallCount">0</span>)</h4>
+                <button type="button" id="btnEditorAddWallModal" class="btn-sm btn-secondary">+ Add Custom Wall</button>
+              </div>
+              <div class="editor-table-wrap">
+                <table class="editor-table" id="editorWallsTable">
+                  <thead>
+                    <tr>
+                      <th>Label / Description</th>
+                      <th>Type</th>
+                      <th>Bounds (X, Y, W, H)</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="editorWallsTbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. AI & VOICE SETTINGS TAB -->
+          <div class="settings-pane" id="set-voice">
+            <form id="voiceSettingsForm" class="settings-section-card">
+              <h4>OpenAI Realtime Voice (GPT-4o WebRTC)</h4>
+              <div class="form-group">
+                <label for="openaiApiKeySettings">OpenAI API Key</label>
+                <input type="password" id="openaiApiKeySettings" placeholder="sk-proj-..." autocomplete="off" />
+                <span class="field-hint">Enables ultra-low latency full-duplex conversational voice. Saved locally in your browser.</span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="openaiVoiceSelectSettings">Voice Tone</label>
+                  <select id="openaiVoiceSelectSettings">
+                    <option value="alloy">Alloy (Balanced & Clear)</option>
+                    <option value="echo">Echo (Warm & Natural)</option>
+                    <option value="shimmer">Shimmer (Bright & Confident)</option>
+                    <option value="verse">Verse (Dynamic & Expressive)</option>
+                    <option value="ballad">Ballad (Calm & Gentle)</option>
+                    <option value="coral">Coral (Friendly & Modern)</option>
+                    <option value="sage">Sage (Authoritative & Deep)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Speech Model</label>
+                  <input type="text" value="gpt-4o-realtime-preview-2024-12-17" disabled />
+                </div>
+              </div>
+              <div class="form-actions-right">
+                <button type="submit" class="btn-primary">Save Voice Settings</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 3. ROBOT KINEMATICS SETTINGS TAB -->
+          <div class="settings-pane" id="set-robot">
+            <form id="robotKinematicsForm" class="settings-section-card">
+              <h4>Kinematics & Collision Clearance</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="robotMaxSpeed">Max Linear Speed (m/s)</label>
+                  <input type="number" id="robotMaxSpeed" step="0.1" min="0.2" max="3.0" value="1.2" required />
+                </div>
+                <div class="form-group">
+                  <label for="robotMaxTurn">Max Angular Speed (rad/s)</label>
+                  <input type="number" id="robotMaxTurn" step="0.1" min="0.5" max="3.0" value="1.5" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="robotSafetyRadius">Robot Safety Footprint Radius (m)</label>
+                  <input type="number" id="robotSafetyRadius" step="0.05" min="0.2" max="1.5" value="0.35" required />
+                  <span class="field-hint">Collision buffer used in A* pathfinding inflation.</span>
+                </div>
+                <div class="form-group">
+                  <label for="robotAcceleration">Linear Acceleration (m/s²)</label>
+                  <input type="number" id="robotAcceleration" step="0.1" min="0.2" max="2.5" value="0.8" required />
+                </div>
+              </div>
+              <div class="form-actions-right">
+                <button type="submit" class="btn-primary">Save Kinematics</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 4. BACKUP & EXPORT TAB -->
+          <div class="settings-pane" id="set-backup">
+            <div class="settings-section-card">
+              <h4>Export & Download Active Floorplan</h4>
+              <p>Download the complete active floorplan (walls, coordinates, POIs, and charging dock) as a JSON configuration file.</p>
+              <button type="button" id="btnExportMapJson" class="btn-secondary">📥 Export Floorplan JSON</button>
+            </div>
+            <div class="settings-section-card">
+              <h4>Import Custom Floorplan JSON</h4>
+              <p>Upload a JSON floorplan file to load custom buildings and room definitions.</p>
+              <input type="file" id="inputImportMapJson" accept=".json" style="display: none;" />
+              <button type="button" id="btnTriggerImportMapJson" class="btn-secondary">📤 Import Floorplan JSON</button>
+            </div>
+            <div class="settings-section-card danger-card">
+              <h4>Reset Floorplan</h4>
+              <p>Revert the current floorplan back to default dimensions and walls.</p>
+              <button type="button" id="btnResetMapDefault" class="btn-danger">↺ Reset Floorplan</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelSettings">Close</button>
+        </div>
+      </div>
+    </div>
 
     <!-- MODAL: ADD CUSTOM POI / WAYPOINT -->
     <div class="modal-overlay" id="addPoiModal" style="display: none;">
@@ -648,6 +897,46 @@
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="btnCancelPoi">Cancel</button>
             <button type="submit" class="btn-primary">Save Destination</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: ADD CUSTOM WALL BARRIER -->
+    <div class="modal-overlay" id="addWallModal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Add Custom Wall Barrier</h3>
+          <button class="modal-close-btn" id="btnCloseWallModal">&times;</button>
+        </div>
+        <form id="addWallForm" class="modal-body">
+          <div class="form-group">
+            <label for="wallLabel">Wall Name / Label</label>
+            <input type="text" id="wallLabel" placeholder="e.g. Corridor Partition East" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wallX">X Start (m)</label>
+              <input type="number" id="wallX" step="0.5" required />
+            </div>
+            <div class="form-group">
+              <label for="wallY">Y Start (m)</label>
+              <input type="number" id="wallY" step="0.5" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wallW">Width (m)</label>
+              <input type="number" id="wallW" step="0.5" value="10.0" required />
+            </div>
+            <div class="form-group">
+              <label for="wallH">Height (m)</label>
+              <input type="number" id="wallH" step="0.5" value="1.0" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="btnCancelWallModal">Cancel</button>
+            <button type="submit" class="btn-primary">Add Wall Barrier</button>
           </div>
         </form>
       </div>

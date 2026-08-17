@@ -78,14 +78,42 @@ class AxynApp {
       openaiVoiceSelect: document.getElementById('openaiVoiceSelect'),
       btnOpenAiSettings: document.getElementById('btnOpenAiSettings'),
 
-      // Floating Logs Widget Elements
-      floatingLogsWidget: document.getElementById('floatingLogsWidget'),
-      logsWidgetHeader: document.getElementById('logsWidgetHeader'),
-      btnToggleMinimizeLogs: document.getElementById('btnToggleMinimizeLogs'),
-      btnFloatingClearLogs: document.getElementById('btnFloatingClearLogs'),
-      floatingLogsStream: document.getElementById('floatingLogsStream'),
-      floatingLogCount: document.getElementById('floatingLogCount'),
-      minBtnText: document.getElementById('minBtnText'),
+      // Unified Settings & Map Editor DOM
+      btnOpenSettings: document.getElementById('btnOpenSettings'),
+      settingsModal: document.getElementById('settingsModal'),
+      btnCloseSettingsModal: document.getElementById('btnCloseSettingsModal'),
+      btnCancelSettings: document.getElementById('btnCancelSettings'),
+      btnLaunchCanvasEditor: document.getElementById('btnLaunchCanvasEditor'),
+      mapPropertiesForm: document.getElementById('mapPropertiesForm'),
+      editMapName: document.getElementById('editMapName'),
+      editMapId: document.getElementById('editMapId'),
+      editMapWidth: document.getElementById('editMapWidth'),
+      editMapHeight: document.getElementById('editMapHeight'),
+      editDockName: document.getElementById('editDockName'),
+      editDockX: document.getElementById('editDockX'),
+      editDockY: document.getElementById('editDockY'),
+      editorPoisTbody: document.getElementById('editorPoisTbody'),
+      editorWallsTbody: document.getElementById('editorWallsTbody'),
+      editorPoiCount: document.getElementById('editorPoiCount'),
+      editorWallCount: document.getElementById('editorWallCount'),
+      btnEditorAddPoi: document.getElementById('btnEditorAddPoi'),
+      btnEditorAddWallModal: document.getElementById('btnEditorAddWallModal'),
+      addWallModal: document.getElementById('addWallModal'),
+      btnCloseWallModal: document.getElementById('btnCloseWallModal'),
+      btnCancelWallModal: document.getElementById('btnCancelWallModal'),
+      addWallForm: document.getElementById('addWallForm'),
+      btnExportMapJson: document.getElementById('btnExportMapJson'),
+      inputImportMapJson: document.getElementById('inputImportMapJson'),
+      btnTriggerImportMapJson: document.getElementById('btnTriggerImportMapJson'),
+      btnResetMapDefault: document.getElementById('btnResetMapDefault'),
+      voiceSettingsForm: document.getElementById('voiceSettingsForm'),
+      openaiApiKeySettings: document.getElementById('openaiApiKeySettings'),
+      openaiVoiceSelectSettings: document.getElementById('openaiVoiceSelectSettings'),
+      robotKinematicsForm: document.getElementById('robotKinematicsForm'),
+      robotMaxSpeed: document.getElementById('robotMaxSpeed'),
+      robotMaxTurn: document.getElementById('robotMaxTurn'),
+      robotSafetyRadius: document.getElementById('robotSafetyRadius'),
+      robotAcceleration: document.getElementById('robotAcceleration'),
 
       toastContainer: document.getElementById('toastContainer')
     };
@@ -102,6 +130,7 @@ class AxynApp {
     this.initFloatingLogs();
     this.initOpenAiSettingsModal();
     this.initAvatarToggle();
+    this.initSettingsModal();
   }
 
   initAvatarToggle() {
@@ -642,6 +671,344 @@ class AxynApp {
       if (stateTitle) stateTitle.textContent = 'OpenAI Realtime Voice';
       if (stateSubtitle) stateSubtitle.textContent = 'Tap microphone to start real-time session';
     }
+  }
+
+  // ==========================================
+  // UNIFIED SETTINGS & MAP CUSTOMIZER MODAL
+  // ==========================================
+  initSettingsModal() {
+    if (!this.dom.settingsModal) return;
+
+    // Open Settings Modal
+    if (this.dom.btnOpenSettings) {
+      this.dom.btnOpenSettings.addEventListener('click', () => {
+        this.openSettingsModal();
+      });
+    }
+
+    const closeSettings = () => {
+      this.dom.settingsModal.style.display = 'none';
+    };
+
+    if (this.dom.btnCloseSettingsModal) {
+      this.dom.btnCloseSettingsModal.addEventListener('click', closeSettings);
+    }
+    if (this.dom.btnCancelSettings) {
+      this.dom.btnCancelSettings.addEventListener('click', closeSettings);
+    }
+
+    // Settings Segmented Tabs
+    const tabBtns = this.dom.settingsModal.querySelectorAll('.settings-tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const panes = this.dom.settingsModal.querySelectorAll('.settings-pane');
+        panes.forEach(pane => {
+          pane.classList.toggle('active', pane.id === targetTab);
+        });
+      });
+    });
+
+    // Launch Interactive Canvas Editor from Settings
+    if (this.dom.btnLaunchCanvasEditor) {
+      this.dom.btnLaunchCanvasEditor.addEventListener('click', () => {
+        closeSettings();
+        if (this.map) {
+          this.map.enterEditorMode();
+        }
+      });
+    }
+
+    // Map Properties Form Submit
+    if (this.dom.mapPropertiesForm) {
+      this.dom.mapPropertiesForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!this.activeMap) return;
+
+        this.activeMap.name = this.dom.editMapName.value.trim() || this.activeMap.name;
+        this.activeMap.dimensions.width = parseFloat(this.dom.editMapWidth.value) || 50;
+        this.activeMap.dimensions.height = parseFloat(this.dom.editMapHeight.value) || 35;
+        this.activeMap.dock.name = this.dom.editDockName.value.trim() || 'Charging Dock';
+        this.activeMap.dock.x = parseFloat(this.dom.editDockX.value) || 5.0;
+        this.activeMap.dock.y = parseFloat(this.dom.editDockY.value) || 5.0;
+
+        this.saveMapToServer();
+      });
+    }
+
+    // Add Destination from Settings
+    if (this.dom.btnEditorAddPoi) {
+      this.dom.btnEditorAddPoi.addEventListener('click', () => {
+        closeSettings();
+        this.openAddPoiModal(8.0, 8.0);
+      });
+    }
+
+    // Add Wall Barrier Modal
+    if (this.dom.btnEditorAddWallModal) {
+      this.dom.btnEditorAddWallModal.addEventListener('click', () => {
+        if (this.dom.addWallModal) {
+          this.dom.addWallModal.style.display = 'flex';
+          const wallX = document.getElementById('wallX');
+          const wallY = document.getElementById('wallY');
+          if (wallX && wallY) {
+            wallX.value = 10.0;
+            wallY.value = 10.0;
+          }
+        }
+      });
+    }
+
+    const closeWallModal = () => {
+      if (this.dom.addWallModal) this.dom.addWallModal.style.display = 'none';
+    };
+    if (this.dom.btnCloseWallModal) this.dom.btnCloseWallModal.addEventListener('click', closeWallModal);
+    if (this.dom.btnCancelWallModal) this.dom.btnCancelWallModal.addEventListener('click', closeWallModal);
+
+    if (this.dom.addWallForm) {
+      this.dom.addWallForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!this.activeMap) return;
+        if (!this.activeMap.obstacles) this.activeMap.obstacles = [];
+
+        const label = document.getElementById('wallLabel').value.trim() || 'Custom Wall';
+        const x = parseFloat(document.getElementById('wallX').value) || 0;
+        const y = parseFloat(document.getElementById('wallY').value) || 0;
+        const w = parseFloat(document.getElementById('wallW').value) || 5;
+        const h = parseFloat(document.getElementById('wallH').value) || 1;
+
+        this.activeMap.obstacles.push({ x, y, w, h, type: 'wall', label });
+        closeWallModal();
+        this.showToast(`Added custom wall: ${label}`, 'success');
+        this.updateSettingsEditorTables();
+      });
+    }
+
+    // Voice Settings in Main Settings
+    if (this.dom.voiceSettingsForm) {
+      this.dom.voiceSettingsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const key = this.dom.openaiApiKeySettings.value.trim();
+        const voice = this.dom.openaiVoiceSelectSettings.value;
+        if (this.openaiRealtime) {
+          this.openaiRealtime.setApiKey(key);
+          this.openaiRealtime.setVoice(voice);
+        }
+        closeSettings();
+        this.showToast('✨ Voice AI configuration updated', 'success');
+      });
+    }
+
+    // Robot Kinematics Form
+    if (this.dom.robotKinematicsForm) {
+      this.dom.robotKinematicsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          maxLinearSpeed: parseFloat(this.dom.robotMaxSpeed.value),
+          maxAngularSpeed: parseFloat(this.dom.robotMaxTurn.value),
+          radius: parseFloat(this.dom.robotSafetyRadius.value),
+          acceleration: parseFloat(this.dom.robotAcceleration.value)
+        };
+
+        try {
+          const res = await fetch('/api/robot/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const resData = await res.json();
+          if (resData.success) {
+            this.showToast('Robot kinematics parameters updated', 'success');
+            closeSettings();
+          }
+        } catch (err) {
+          this.showToast('Failed to update kinematics: ' + err.message, 'error');
+        }
+      });
+    }
+
+    // Export Map JSON
+    if (this.dom.btnExportMapJson) {
+      this.dom.btnExportMapJson.addEventListener('click', () => {
+        this.exportMapJson();
+      });
+    }
+
+    // Import Map JSON
+    if (this.dom.btnTriggerImportMapJson && this.dom.inputImportMapJson) {
+      this.dom.btnTriggerImportMapJson.addEventListener('click', () => {
+        this.dom.inputImportMapJson.click();
+      });
+
+      this.dom.inputImportMapJson.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const importedMap = JSON.parse(ev.target.result);
+            if (!importedMap.id || !importedMap.dimensions) {
+              throw new Error('Invalid map schema. Missing "id" or "dimensions".');
+            }
+            this.activeMap = importedMap;
+            this.saveMapToServer();
+            this.populateSettingsFields();
+            this.showToast(`Successfully imported map: ${importedMap.name}`, 'success');
+          } catch (err) {
+            this.showToast(`Import failed: ${err.message}`, 'error');
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    // Reset Map Default
+    if (this.dom.btnResetMapDefault) {
+      this.dom.btnResetMapDefault.addEventListener('click', () => {
+        if (confirm('Are you sure you want to reset this floorplan back to default dimensions and walls?')) {
+          this.resetMapDefault();
+        }
+      });
+    }
+  }
+
+  openSettingsModal() {
+    if (!this.dom.settingsModal) return;
+    this.populateSettingsFields();
+    this.dom.settingsModal.style.display = 'flex';
+  }
+
+  populateSettingsFields() {
+    if (!this.activeMap) return;
+
+    if (this.dom.editMapName) this.dom.editMapName.value = this.activeMap.name || '';
+    if (this.dom.editMapId) this.dom.editMapId.value = this.activeMap.id || '';
+    if (this.dom.editMapWidth) this.dom.editMapWidth.value = this.activeMap.dimensions.width;
+    if (this.dom.editMapHeight) this.dom.editMapHeight.value = this.activeMap.dimensions.height;
+
+    if (this.activeMap.dock) {
+      if (this.dom.editDockName) this.dom.editDockName.value = this.activeMap.dock.name || 'Charging Dock';
+      if (this.dom.editDockX) this.dom.editDockX.value = this.activeMap.dock.x;
+      if (this.dom.editDockY) this.dom.editDockY.value = this.activeMap.dock.y;
+    }
+
+    if (this.openaiRealtime) {
+      if (this.dom.openaiApiKeySettings) this.dom.openaiApiKeySettings.value = this.openaiRealtime.apiKey || '';
+      if (this.dom.openaiVoiceSelectSettings) this.dom.openaiVoiceSelectSettings.value = this.openaiRealtime.voice || 'alloy';
+    }
+
+    this.updateSettingsEditorTables();
+  }
+
+  updateSettingsEditorTables() {
+    if (!this.activeMap) return;
+
+    // 1. POIs Table
+    const pois = this.activeMap.pois || [];
+    if (this.dom.editorPoiCount) this.dom.editorPoiCount.textContent = pois.length;
+    if (this.dom.editorPoisTbody) {
+      this.dom.editorPoisTbody.innerHTML = '';
+      pois.forEach((poi, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${poi.name}</strong></td>
+          <td><span class="poi-category-badge">${poi.category || 'Point'}</span></td>
+          <td>(${poi.x.toFixed(1)}m, ${poi.y.toFixed(1)}m)</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${poi.color || '#00e5ff'};"></span></td>
+          <td>
+            <button class="table-action-btn btn-del" data-poi-idx="${index}">Delete</button>
+          </td>
+        `;
+
+        tr.querySelector('.btn-del').addEventListener('click', () => {
+          this.activeMap.pois.splice(index, 1);
+          this.showToast(`Deleted ${poi.name}`, 'info');
+          this.renderPois();
+          this.updateSettingsEditorTables();
+        });
+
+        this.dom.editorPoisTbody.appendChild(tr);
+      });
+    }
+
+    // 2. Walls / Obstacles Table
+    const obs = this.activeMap.obstacles || [];
+    if (this.dom.editorWallCount) this.dom.editorWallCount.textContent = obs.length;
+    if (this.dom.editorWallsTbody) {
+      this.dom.editorWallsTbody.innerHTML = '';
+      obs.forEach((wall, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${wall.label || 'Wall Segment'}</td>
+          <td>${wall.type || 'wall'}</td>
+          <td>X:${wall.x.toFixed(1)}, Y:${wall.y.toFixed(1)}, W:${wall.w.toFixed(1)}, H:${wall.h.toFixed(1)}</td>
+          <td>
+            <button class="table-action-btn btn-del" data-wall-idx="${index}">Delete</button>
+          </td>
+        `;
+
+        tr.querySelector('.btn-del').addEventListener('click', () => {
+          this.activeMap.obstacles.splice(index, 1);
+          this.showToast(`Deleted ${wall.label || 'Wall'}`, 'info');
+          this.updateSettingsEditorTables();
+        });
+
+        this.dom.editorWallsTbody.appendChild(tr);
+      });
+    }
+  }
+
+  async saveMapToServer() {
+    if (!this.activeMap) return;
+
+    try {
+      const res = await fetch('/api/maps/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.activeMap)
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.activeMap = data.activeMap;
+        if (this.map) this.map.resetView();
+        this.renderPois();
+        this.showToast(`💾 Custom Map "${this.activeMap.name}" saved successfully!`, 'success');
+      } else {
+        this.showToast(`Error saving map: ${data.error}`, 'error');
+      }
+    } catch (err) {
+      this.showToast(`Failed to save map: ${err.message}`, 'error');
+    }
+  }
+
+  exportMapJson() {
+    if (!this.activeMap) return;
+    const jsonStr = JSON.stringify(this.activeMap, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${this.activeMap.id || 'floorplan'}_export.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.showToast('📥 Floorplan exported to JSON file', 'success');
+  }
+
+  async resetMapDefault() {
+    if (!this.config || !this.config.maps || this.config.maps.length === 0) return;
+    const defaultTemplate = this.config.maps[0];
+    if (!defaultTemplate) return;
+
+    this.activeMap = JSON.parse(JSON.stringify(defaultTemplate));
+    await this.saveMapToServer();
+    this.populateSettingsFields();
+    this.showToast('↺ Floorplan reset to default layout', 'info');
   }
 
   showToast(message, type = 'info') {

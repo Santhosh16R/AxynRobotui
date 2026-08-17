@@ -963,6 +963,106 @@ app.post('/api/maps/select', (req, res) => {
   res.json({ success: true, activeMap });
 });
 
+// MAP EDITOR: Save Map Customization & Persist to disk
+app.post('/api/maps/save', (req, res) => {
+  try {
+    const updatedMap = req.body;
+    if (!updatedMap || !updatedMap.id) {
+      return res.status(400).json({ error: 'Invalid map data' });
+    }
+
+    const mapIndex = config.maps.findIndex(m => m.id === updatedMap.id);
+    if (mapIndex >= 0) {
+      config.maps[mapIndex] = updatedMap;
+    } else {
+      config.maps.push(updatedMap);
+    }
+
+    if (activeMap.id === updatedMap.id) {
+      activeMap = updatedMap;
+      navGrid = new GridMap(activeMap);
+    }
+
+    // Persist to config.json
+    fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify(config, null, 2), 'utf-8');
+    addLog(`Map Editor: Saved custom map "${updatedMap.name}" (${updatedMap.obstacles ? updatedMap.obstacles.length : 0} obstacles, ${updatedMap.pois ? updatedMap.pois.length : 0} POIs)`, 'success');
+
+    broadcast({
+      type: 'map_changed',
+      activeMap: activeMap,
+      robot: robotState
+    });
+
+    res.json({ success: true, activeMap });
+  } catch (err) {
+    console.error('Error saving custom map:', err);
+    res.status(500).json({ error: 'Failed to save map customization: ' + err.message });
+  }
+});
+
+// MAP EDITOR: Create New Map
+app.post('/api/maps/create', (req, res) => {
+  try {
+    const { id, name, width, height } = req.body;
+    const newId = id || `custom_map_${Date.now()}`;
+    const newMap = {
+      id: newId,
+      name: name || 'Custom Floorplan',
+      dimensions: {
+        width: parseFloat(width) || 40.0,
+        height: parseFloat(height) || 30.0,
+        meterToPixel: 20
+      },
+      dock: { x: 4.0, y: 4.0, theta: 0, name: 'Home Base Dock' },
+      pois: [
+        {
+          id: `poi_${Date.now()}`,
+          name: 'Main Entrance',
+          category: 'Reception',
+          x: 6.0,
+          y: 6.0,
+          theta: 0,
+          color: '#00e5ff',
+          description: 'Custom entry point'
+        }
+      ],
+      obstacles: [
+        { x: 0, y: 0, w: parseFloat(width) || 40.0, h: 1.5, type: 'wall', label: 'North Perimeter Wall' },
+        { x: 0, y: (parseFloat(height) || 30.0) - 1.5, w: parseFloat(width) || 40.0, h: 1.5, type: 'wall', label: 'South Perimeter Wall' },
+        { x: 0, y: 0, w: 1.5, h: parseFloat(height) || 30.0, type: 'wall', label: 'West Perimeter Wall' },
+        { x: (parseFloat(width) || 40.0) - 1.5, y: 0, w: 1.5, h: parseFloat(height) || 30.0, type: 'wall', label: 'East Perimeter Wall' }
+      ],
+      rooms: []
+    };
+
+    config.maps.push(newMap);
+    fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify(config, null, 2), 'utf-8');
+    switchMap(newId);
+    addLog(`Created new custom map: ${newMap.name}`, 'success');
+
+    res.json({ success: true, activeMap: newMap });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update Robot Kinematics / Safety Config
+app.post('/api/robot/config', (req, res) => {
+  try {
+    const { maxLinearSpeed, maxAngularSpeed, radius, acceleration } = req.body;
+    if (maxLinearSpeed) config.robot.maxLinearSpeed = parseFloat(maxLinearSpeed);
+    if (maxAngularSpeed) config.robot.maxAngularSpeed = parseFloat(maxAngularSpeed);
+    if (radius) config.robot.radius = parseFloat(radius);
+    if (acceleration) config.robot.acceleration = parseFloat(acceleration);
+
+    fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify(config, null, 2), 'utf-8');
+    addLog('Robot kinematics configuration updated', 'success');
+    res.json({ success: true, robotConfig: config.robot });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/pois', (req, res) => {
   res.json(activeMap.pois);
 });
