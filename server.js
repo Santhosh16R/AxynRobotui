@@ -1,3 +1,6 @@
+// Allow corporate TLS proxies and custom Windows root certs for OpenAI API calls
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const express = require('express');
 const http = require('http');
 const https = require('https');
@@ -1143,13 +1146,78 @@ app.post('/api/dock', (req, res) => {
   res.json({ success: true });
 });
 
-app.post('/api/voice-command', (req, res) => {
-  const { command } = req.body;
+app.post('/api/voice-command', async (req, res) => {
+  const { command, apiKey } = req.body;
   if (!command) {
     return res.status(400).json({ error: 'Command text is required' });
   }
-  const result = processVoiceIntent(command);
-  res.json(result);
+
+  // 1. High priority physical actions (estop, dock, explicit destination matching)
+  const localResult = processVoiceIntent(command);
+  if (localResult.action === 'estop' || localResult.action === 'navigate') {
+    return res.json(localResult);
+  }
+
+  // 2. If OpenAI API Key is available, query GPT-4o-mini with full knowledge base
+  const key = apiKey || process.env.OPENAI_API_KEY;
+  if (key) {
+    try {
+      const folderKnowledge = loadKnowledgeFolder();
+      const customKnowledge = activeMap.knowledgeBase || config.knowledgeBase || '';
+      const fullKnowledge = [customKnowledge, folderKnowledge].filter(Boolean).join('\n\n');
+      const poisListStr = activeMap.pois.map(p => `- "${p.name}" (${p.category}): ${p.description || 'Waypoint'}`).join('\n');
+
+      const systemPrompt = `You are Axyn Concierge, a witty, warm, and highly capable autonomous robot concierge at "${activeMap.name}".
+Keep spoken answers concise, natural, and conversational (1 to 3 short sentences).
+
+FACILITY KNOWLEDGE & DOCUMENTATION:
+${fullKnowledge}
+
+DESTINATIONS ON THIS FLOOR:
+${poisListStr}
+
+ROBOT TELEMETRY:
+- Coordinates: (${robotState.x.toFixed(1)}m, ${robotState.y.toFixed(1)}m)
+- Battery: ${Math.round(robotState.battery)}%
+
+If the user asks to go somewhere or asks about a room on the floor, warmly confirm and let them know you can escort them.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: command }
+          ],
+          temperature: 0.7,
+          max_tokens: 200
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (reply) {
+          addLog(`Voice AI: "${command}" -> "${reply.slice(0, 60)}..."`, 'success');
+          return res.json({
+            speech: reply,
+            action: 'converse',
+            success: true
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('OpenAI Chat Completion fallback error:', e.message);
+    }
+  }
+
+  // 3. Fallback to local rule engine
+  res.json(localResult);
 });
 
 app.get('/api/knowledge/list', (req, res) => {
@@ -1376,6 +1444,7 @@ Always acknowledge the conversation warmly and confirm when you begin driving to
     port: 443,
     path: '/v1/realtime/sessions',
     method: 'POST',
+    rejectUnauthorized: false,
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',

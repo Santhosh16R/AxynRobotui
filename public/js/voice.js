@@ -344,11 +344,12 @@ class VoiceAssistant {
   }
 
   processCommand(commandText) {
+    const apiKey = localStorage.getItem('axyn_openai_key') || '';
     // Send to advanced conversational NLP processor
     fetch('/api/voice-command', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command: commandText })
+      body: JSON.stringify({ command: commandText, apiKey: apiKey })
     })
       .then(res => res.json())
       .then(data => {

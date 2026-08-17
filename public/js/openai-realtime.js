@@ -83,12 +83,44 @@ class OpenAIRealtimeClient {
 
       // 2. Initialize WebRTC Peer Connection
       this.peerConnection = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
       });
+
+      // Track connection state
+      this.peerConnection.onconnectionstatechange = () => {
+        const state = this.peerConnection.connectionState;
+        console.log('WebRTC Connection State:', state);
+        if (state === 'connected') {
+          this.isConnected = true;
+          this.isConnecting = false;
+          this.app.updateRealtimeUiState('connected');
+          this.app.showToast('✨ Connected to OpenAI Realtime Voice (GPT-4o)', 'success');
+        } else if (state === 'failed' || state === 'closed' || state === 'disconnected') {
+          if (this.isConnected) {
+            this.disconnect();
+            this.app.showToast(`WebRTC session ${state}.`, 'warn');
+          }
+        }
+      };
+
+      this.peerConnection.oniceconnectionstatechange = () => {
+        const iceState = this.peerConnection.iceConnectionState;
+        console.log('WebRTC ICE State:', iceState);
+        if (iceState === 'connected' || iceState === 'completed') {
+          this.isConnected = true;
+          this.isConnecting = false;
+          this.app.updateRealtimeUiState('connected');
+        }
+      };
 
       // 3. Audio Stream Output Handler
       this.peerConnection.ontrack = (event) => {
         this.remoteAudioEl.srcObject = event.streams[0];
+        this.isConnected = true;
+        this.isConnecting = false;
         this.app.updateRealtimeUiState('connected');
         this.app.voice.setSpeakingState(true);
       };
@@ -142,7 +174,7 @@ class OpenAIRealtimeClient {
     } catch (err) {
       console.error('OpenAI Realtime WebRTC connection error:', err);
       this.disconnect();
-      this.app.showToast(`OpenAI Realtime Error: ${err.message}`, 'error');
+      this.app.showToast(`OpenAI Connection Error: ${err.message}`, 'error');
       return false;
     }
   }
