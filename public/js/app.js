@@ -123,6 +123,9 @@ class AxynApp {
       openaiApiKeySettings: document.getElementById('openaiApiKeySettings'),
       openaiVoiceSelectSettings: document.getElementById('openaiVoiceSelectSettings'),
       facilityKnowledgeBase: document.getElementById('facilityKnowledgeBase'),
+      inputIngestUrl: document.getElementById('inputIngestUrl'),
+      inputIngestTitle: document.getElementById('inputIngestTitle'),
+      btnIngestUrl: document.getElementById('btnIngestUrl'),
       robotKinematicsForm: document.getElementById('robotKinematicsForm'),
       robotMaxSpeed: document.getElementById('robotMaxSpeed'),
       robotMaxTurn: document.getElementById('robotMaxTurn'),
@@ -822,6 +825,41 @@ class AxynApp {
 
         closeSettings();
         this.showToast('✨ Voice AI & Knowledge Base updated', 'success');
+      });
+    }
+
+    // Web URL Ingestion
+    if (this.dom.btnIngestUrl && this.dom.inputIngestUrl) {
+      this.dom.btnIngestUrl.addEventListener('click', async () => {
+        const url = this.dom.inputIngestUrl.value.trim();
+        const title = (this.dom.inputIngestTitle && this.dom.inputIngestTitle.value.trim()) || 'web_doc';
+        if (!url) {
+          this.showToast('Please enter a valid website URL', 'warn');
+          return;
+        }
+
+        this.dom.btnIngestUrl.disabled = true;
+        this.dom.btnIngestUrl.textContent = '⏳ Fetching & Ingesting...';
+        this.showToast(`Fetching and ingesting knowledge from ${url}...`, 'info');
+
+        try {
+          const res = await fetch('/api/knowledge/ingest-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, title })
+          });
+          const data = await res.json();
+          if (data.success) {
+            this.showToast(`✅ Successfully ingested ${data.fileName} (${data.length} chars) into AI!`, 'success');
+          } else {
+            this.showToast(`Failed to ingest: ${data.error}`, 'error');
+          }
+        } catch (err) {
+          this.showToast(`Ingestion error: ${err.message}`, 'error');
+        } finally {
+          this.dom.btnIngestUrl.disabled = false;
+          this.dom.btnIngestUrl.textContent = '⚡ Fetch & Ingest Web URL';
+        }
       });
     }
 

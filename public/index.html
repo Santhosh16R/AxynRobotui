@@ -798,6 +798,24 @@
                 <button type="submit" class="btn-primary">Save Voice & Knowledge Settings</button>
               </div>
             </form>
+
+            <div class="settings-section-card" style="margin-top: 16px;">
+              <h4>🌐 Ingest Web URL into Knowledge Base</h4>
+              <p>Fetch and ingest live websites, documentation, or product pages (e.g. <code>https://www.ltm.com/iNXT</code>) into the robot's real-time conversational knowledge base.</p>
+              <div class="form-row" style="margin-top: 10px;">
+                <div class="form-group" style="flex: 2;">
+                  <label for="inputIngestUrl">Website / Documentation URL</label>
+                  <input type="url" id="inputIngestUrl" placeholder="https://www.ltm.com/iNXT" value="https://www.ltm.com/iNXT" />
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label for="inputIngestTitle">Document Title</label>
+                  <input type="text" id="inputIngestTitle" placeholder="ltm_inxt" value="ltm_inxt" />
+                </div>
+              </div>
+              <div class="form-actions-right">
+                <button type="button" id="btnIngestUrl" class="btn-secondary">⚡ Fetch & Ingest Web URL</button>
+              </div>
+            </div>
           </div>
 
           <!-- 3. ROBOT KINEMATICS SETTINGS TAB -->

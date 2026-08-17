@@ -1111,6 +1111,94 @@ app.post('/api/voice-command', (req, res) => {
   res.json(result);
 });
 
+app.get('/api/knowledge/list', (req, res) => {
+  const knowledgeDir = path.join(__dirname, 'knowledge');
+  if (!fs.existsSync(knowledgeDir)) {
+    return res.json({ files: [] });
+  }
+  try {
+    const files = fs.readdirSync(knowledgeDir)
+      .filter(f => f.endsWith('.md') || f.endsWith('.txt'))
+      .map(f => {
+        const stats = fs.statSync(path.join(knowledgeDir, f));
+        return { name: f, size: stats.size, modified: stats.mtime };
+      });
+    res.json({ files });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/knowledge/ingest-url', async (req, res) => {
+  const { url, title } = req.body;
+  if (!url) {
+    return res.status(400).json({ error: 'URL is required' });
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    }
+
+    const html = await response.text();
+
+    // Clean HTML to Markdown text
+    const cleanText = html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+      .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, '')
+      .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '')
+      .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, '')
+      .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, '')
+      .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '\n# $1\n')
+      .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '\n## $1\n')
+      .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '\n### $1\n')
+      .replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+      .replace(/<p[^>]*>(.*?)<\/p>/gi, '\n$1\n')
+      .replace(/<br\s*[\/]?>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .trim();
+
+    const safeTitle = (title || new URL(url).pathname.replace(/\W+/g, '_') || 'web_page')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .toLowerCase();
+
+    const fileName = `${safeTitle}.md`;
+    const knowledgeDir = path.join(__dirname, 'knowledge');
+    if (!fs.existsSync(knowledgeDir)) {
+      fs.mkdirSync(knowledgeDir, { recursive: true });
+    }
+
+    const fileContent = `# Knowledge Ingested from: ${url}\n\n${cleanText}`;
+    fs.writeFileSync(path.join(knowledgeDir, fileName), fileContent, 'utf8');
+
+    addLog(`Ingested web knowledge from ${url} -> knowledge/${fileName}`, 'success');
+    res.json({
+      success: true,
+      fileName,
+      url,
+      length: cleanText.length,
+      preview: cleanText.slice(0, 300) + '...'
+    });
+  } catch (err) {
+    addLog(`Failed to ingest URL ${url}: ${err.message}`, 'error');
+    res.status(500).json({ error: `Failed to fetch URL: ${err.message}` });
+  }
+});
+
 // ==========================================
 function loadKnowledgeFolder() {
   const knowledgeDir = path.join(__dirname, 'knowledge');
