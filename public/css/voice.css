@@ -913,6 +913,38 @@
   box-shadow: 0 0 36px rgba(48, 209, 88, 0.65);
 }
 
+.ios-mic-btn.muted {
+  background: radial-gradient(circle at 40% 40%, #ef4444 0%, #991b1b 100%) !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 32px rgba(239, 68, 68, 0.65) !important;
+  color: #fff !important;
+}
+
+.ios-mic-btn.muted svg {
+  stroke: #ffffff !important;
+}
+
+.ios-mic-btn.muted .mic-ripple {
+  display: none !important;
+}
+
+.ios-mic-btn.muted::after {
+  content: 'MUTED';
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
 .mic-ripple.ring-1 {
   animation-delay: 0s;
 }

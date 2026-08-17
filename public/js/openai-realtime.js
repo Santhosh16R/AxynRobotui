@@ -197,11 +197,15 @@ class OpenAIRealtimeClient {
     });
     if (this.isMuted) {
       this.app.showToast('Microphone Muted (OpenAI Realtime Session Active)', 'info');
-      this.app.voice.setListeningState(false);
+      this.app.updateRealtimeUiState('muted');
+      if (this.app.voice) this.app.voice.setListeningState(false);
     } else {
       this.app.showToast('Microphone Active - Speak naturally', 'success');
-      this.app.voice.setListeningState(true);
-      this.app.voice.playChime('listen');
+      this.app.updateRealtimeUiState('connected');
+      if (this.app.voice) {
+        this.app.voice.setListeningState(true);
+        this.app.voice.playChime('listen');
+      }
     }
   }
 

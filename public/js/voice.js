@@ -20,7 +20,7 @@ class VoiceAssistant {
     this.audioCtx = null;
 
     this.dom = {
-      card: document.querySelector('.voice-assistant-card'),
+      card: document.querySelector('.face-hero-section') || document.querySelector('.face-hero-container') || document.querySelector('.voice-assistant-card') || document.body,
       btnToggle: document.getElementById('btnVoiceToggle'),
       btnTts: document.getElementById('btnTtsToggle'),
       btnEngineOpenai: document.getElementById('btnEngineOpenai'),
@@ -262,17 +262,33 @@ class VoiceAssistant {
   // ==========================================
   setListeningState(listening) {
     if (listening) {
-      this.dom.card.classList.add('listening');
-      this.dom.btnToggle.classList.add('active');
-      this.dom.stateTitle.textContent = 'Listening...';
-      this.dom.stateSubtitle.textContent = 'Speak your destination or command clearly';
+      if (this.dom.card) this.dom.card.classList.add('listening');
+      if (this.dom.btnToggle) {
+        this.dom.btnToggle.classList.remove('muted');
+        this.dom.btnToggle.classList.add('active');
+        this.dom.btnToggle.title = 'Click to Mute Microphone';
+      }
+      if (this.dom.stateTitle) this.dom.stateTitle.textContent = 'Listening...';
+      if (this.dom.stateSubtitle) this.dom.stateSubtitle.textContent = 'Speak your destination or command clearly';
       if (this.app.face) this.app.face.setExpression('listening');
     } else {
-      this.dom.card.classList.remove('listening');
+      if (this.dom.card) this.dom.card.classList.remove('listening');
+      const isMuted = this.app.openaiRealtime && this.app.openaiRealtime.isMuted;
       if (this.engine !== 'openai' || !this.app.openaiRealtime || !this.app.openaiRealtime.isConnected) {
-        this.dom.btnToggle.classList.remove('active');
-        this.dom.stateTitle.textContent = this.engine === 'openai' ? 'OpenAI Realtime Voice' : 'Ready to Listen';
-        this.dom.stateSubtitle.textContent = 'Tap microphone and ask for a destination';
+        if (this.dom.btnToggle) {
+          this.dom.btnToggle.classList.remove('active', 'muted');
+          this.dom.btnToggle.title = 'Toggle Voice Recognition';
+        }
+        if (this.dom.stateTitle) this.dom.stateTitle.textContent = this.engine === 'openai' ? 'OpenAI Realtime Voice' : 'Ready to Listen';
+        if (this.dom.stateSubtitle) this.dom.stateSubtitle.textContent = 'Tap microphone and ask for a destination';
+      } else if (isMuted) {
+        if (this.dom.btnToggle) {
+          this.dom.btnToggle.classList.remove('active');
+          this.dom.btnToggle.classList.add('muted');
+          this.dom.btnToggle.title = 'Microphone Muted - Click to Unmute';
+        }
+        if (this.dom.stateTitle) this.dom.stateTitle.textContent = '🔴 Microphone Muted (OpenAI Active)';
+        if (this.dom.stateSubtitle) this.dom.stateSubtitle.textContent = 'Tap microphone to unmute and speak to Axyn';
       }
       if (this.app.face) this.app.face.setExpression('idle');
     }
@@ -280,13 +296,21 @@ class VoiceAssistant {
 
   setSpeakingState(speaking) {
     if (speaking) {
-      this.dom.card.classList.add('speaking');
-      this.dom.stateTitle.textContent = 'Axyn Speaking...';
+      if (this.dom.card) this.dom.card.classList.add('speaking');
+      if (this.dom.stateTitle) this.dom.stateTitle.textContent = 'Axyn Speaking...';
       if (this.app.face) this.app.face.setExpression('speaking');
     } else {
-      this.dom.card.classList.remove('speaking');
+      if (this.dom.card) this.dom.card.classList.remove('speaking');
       if (!this.isListening) {
-        this.dom.stateTitle.textContent = this.engine === 'openai' ? 'OpenAI Realtime Voice' : 'Ready to Listen';
+        const isOpenAiConnected = this.app.openaiRealtime && this.app.openaiRealtime.isConnected;
+        const isMuted = this.app.openaiRealtime && this.app.openaiRealtime.isMuted;
+        if (this.dom.stateTitle) {
+          if (isOpenAiConnected) {
+            this.dom.stateTitle.textContent = isMuted ? '🔴 Microphone Muted (OpenAI Active)' : '🟢 GPT-4o Realtime Active';
+          } else {
+            this.dom.stateTitle.textContent = this.engine === 'openai' ? 'OpenAI Realtime Voice' : 'Ready to Listen';
+          }
+        }
         if (this.app.face) this.app.face.setExpression('idle');
       }
     }
@@ -375,8 +399,8 @@ class VoiceAssistant {
   }
 
   respond(text, chimeType = 'success') {
-    this.dom.robotReplyRow.style.display = 'flex';
-    this.dom.robotReplyText.textContent = text;
+    if (this.dom.robotReplyRow) this.dom.robotReplyRow.style.display = 'flex';
+    if (this.dom.robotReplyText) this.dom.robotReplyText.textContent = text;
     this.playChime(chimeType);
 
     if (this.ttsEnabled && this.synthesis) {
@@ -394,64 +418,6 @@ class VoiceAssistant {
       utterance.onend = () => this.setSpeakingState(false);
       utterance.onerror = () => this.setSpeakingState(false);
       this.synthesis.speak(utterance);
-    }
-  }
-
-  initEventHandlers() {
-    this.dom.btnToggle.addEventListener('click', () => {
-      this.toggleVoiceActivation();
-    });
-
-    this.dom.btnTts.addEventListener('click', () => {
-      this.ttsEnabled = !this.ttsEnabled;
-      this.dom.btnTts.classList.toggle('active', this.ttsEnabled);
-      this.dom.btnTts.querySelector('span').textContent = `Voice Audio: ${this.ttsEnabled ? 'ON' : 'OFF'}`;
-      if (!this.ttsEnabled && this.synthesis) this.synthesis.cancel();
-    });
-
-    this.dom.chipsContainer.addEventListener('click', (e) => {
-      const chip = e.target.closest('.prompt-chip');
-      if (chip && chip.dataset.cmd) {
-        const cmd = chip.dataset.cmd;
-        if (this.engine === 'openai' && this.app.openaiRealtime && this.app.openaiRealtime.isConnected) {
-          this.app.openaiRealtime.sendEvent({
-            type: 'conversation.item.create',
-            item: {
-              type: 'message',
-              role: 'user',
-              content: [{ type: 'input_text', text: cmd }]
-            }
-          });
-          this.app.openaiRealtime.sendEvent({ type: 'response.create' });
-          this.displayUserTranscript(cmd);
-        } else {
-          this.handleUserVoiceInput(cmd);
-        }
-      }
-    });
-
-    if (this.dom.textForm && this.dom.textInput) {
-      this.dom.textForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const val = this.dom.textInput.value.trim();
-        if (val) {
-          if (this.engine === 'openai' && this.app.openaiRealtime && this.app.openaiRealtime.isConnected) {
-            this.app.openaiRealtime.sendEvent({
-              type: 'conversation.item.create',
-              item: {
-                type: 'message',
-                role: 'user',
-                content: [{ type: 'input_text', text: val }]
-              }
-            });
-            this.app.openaiRealtime.sendEvent({ type: 'response.create' });
-            this.displayUserTranscript(val);
-          } else {
-            this.handleUserVoiceInput(val);
-          }
-          this.dom.textInput.value = '';
-        }
-      });
     }
   }
 }

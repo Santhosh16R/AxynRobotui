@@ -672,20 +672,39 @@ class AxynApp {
   }
 
   updateRealtimeUiState(state) {
-    // state: 'connecting' | 'connected' | 'disconnected'
+    // state: 'connecting' | 'connected' | 'muted' | 'disconnected'
     const btnToggle = this.dom.btnVoiceToggle || document.getElementById('btnVoiceToggle');
     const stateTitle = document.getElementById('voiceStateTitle');
     const stateSubtitle = document.getElementById('voiceStateSubtitle');
 
     if (state === 'connecting') {
+      if (btnToggle) {
+        btnToggle.classList.remove('active', 'muted');
+        btnToggle.title = 'Connecting...';
+      }
       if (stateTitle) stateTitle.textContent = 'Connecting WebRTC...';
       if (stateSubtitle) stateSubtitle.textContent = 'Establishing secure real-time channel with OpenAI GPT-4o';
     } else if (state === 'connected') {
-      if (btnToggle) btnToggle.classList.add('active');
-      if (stateTitle) stateTitle.textContent = 'GPT-4o Realtime Active';
+      if (btnToggle) {
+        btnToggle.classList.remove('muted');
+        btnToggle.classList.add('active');
+        btnToggle.title = 'Click to Mute Microphone';
+      }
+      if (stateTitle) stateTitle.textContent = '🟢 GPT-4o Realtime Active';
       if (stateSubtitle) stateSubtitle.textContent = 'Speak naturally! Say "Take me to Reception" or ask questions';
+    } else if (state === 'muted') {
+      if (btnToggle) {
+        btnToggle.classList.remove('active');
+        btnToggle.classList.add('muted');
+        btnToggle.title = 'Microphone Muted - Click to Unmute';
+      }
+      if (stateTitle) stateTitle.textContent = '🔴 Microphone Muted (OpenAI Active)';
+      if (stateSubtitle) stateSubtitle.textContent = 'Tap microphone to unmute and speak to Axyn';
     } else if (state === 'disconnected') {
-      if (btnToggle) btnToggle.classList.remove('active');
+      if (btnToggle) {
+        btnToggle.classList.remove('active', 'muted');
+        btnToggle.title = 'Toggle Voice Recognition';
+      }
       if (stateTitle) stateTitle.textContent = 'OpenAI Realtime Voice';
       if (stateSubtitle) stateSubtitle.textContent = 'Tap microphone to start real-time session';
     }
